@@ -11,13 +11,11 @@ Manage your ads. Define what condition should activate them (visitor from search
 
 **Who Sees Ads** is an advanced **ad management** plugin that lets you decide who will see your ads, depending on user defined conditions. You can manage ads in your templates (eg *sidebar.php*) or within posts and pages.
 
-The association of an ad and these conditions is called a context: a set of circumstances you define, that will eventually display or not an ad.
-
 For instance, you could consider the following criteria: Is the visitor a regular reader? Does this visitor come from a search engine? Is the visitor currently reading an old post, or something fresh? Setting this kind of display rules is a matter of clicks in an intuitive and visual interface.
 
-== Documentation ==
+The plugin allows for easily creating display rules with a very advanced user interface.
 
-For a more detailed documentation, and for example of advanced usages of the plugin, please visit its official page: [Who Sees Ads](http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ "Who Sees Ads")
+For a more detailed documentation, demo of the interface, and for example of advanced usages of the plugin, please visit its official page: [Who Sees Ads](http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ "Who Sees Ads")
 
 == Installation ==
 
