@@ -1,0 +1,37 @@
+=== Plugin Name ===
+Donate link: http://planetozh.com/exit/donate
+Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh
+Requires at least: 2.0
+Tested up to: 2.3
+Stable tag: trunk
+
+Manage your ads. Define what condition should activate them (visitor from search engine...). Make more money.
+
+== Description ==
+
+**Who Sees Ads** is an advanced **ad management** plugin that lets you decide who will see your ads, depending on user defined conditions. You can manage ads in your templates (eg *sidebar.php*) or within posts and pages.
+
+The association of an ad and these conditions is called a context: a set of circumstances you define, that will eventually display or not an ad.
+
+For instance, you could consider the following criteria: Is the visitor a regular reader? Does this visitor come from a search engine? Is the visitor currently reading an old post, or something fresh? Setting this kind of display rules is a matter of clicks in an intuitive and visual interface.
+
+== Documentation ==
+
+For a more detailed documentation, and for example of advanced usages of the plugin, please visit its official page: [Who Sees Ads](http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ "Who Sees Ads")
+
+== Installation ==
+
+1. Unzip & upload to the `/wp-content/plugins/who_sees_ads` directory
+1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Refer to the *Options / Who Sees Ads* page for detailed instructions, example, and help wizards.
+
+== Frequently Asked Questions ==
+
+= Is it compatible with Google / Yahoo Publisher / whatever terms of use ? =
+
+Yes. It does not modify, alter, change or whatever synonym you'd like your Adsense / YPN code. It just adds criteria to decide if you want to show them or not.
+
+= Why would I want not to show ads? I want more money! =
+
+It's been proven by various analytic articles that regular readers come to your site for your content, and don't click ads.
+On the other hands, new visitors, or people referred to your site by search engines, are likely to click ads.
