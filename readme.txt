@@ -1,6 +1,6 @@
 === Plugin Name ===
 Donate link: http://planetozh.com/exit/donate
-Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh, monetize, monetization
+Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh, monetize, monetization, paypal
 Requires at least: 2.0
 Tested up to: 2.3
 Stable tag: trunk
@@ -11,7 +11,7 @@ Manage your ads. Define under what condition they will show (visitor from search
 
 **Who Sees Ads** is an advanced **ad management** plugin that lets you decide who will see your ads, depending on user defined conditions. You can manage ads in your templates (eg *sidebar.php*) or within posts and pages.
 
-For instance, you could consider the following criteria: Is the visitor a regular reader? Does this visitor come from a search engine? Is the visitor currently reading an old post, or something fresh? Setting this kind of display rules is a matter of clicks in an intuitive and visual interface.
+For instance, you could consider the following criteria: Is the visitor a regular reader? Does this visitor come from a search engine? Is the visitor currently reading an old post, or something fresh?
 
 The plugin allows for easily creating display rules with a very advanced user interface.
 
@@ -27,7 +27,7 @@ For a more detailed documentation, demo of the interface, and examples of advanc
 
 = Is it compatible with Google / Yahoo Publisher / whatever terms of use ? =
 
-Yes. It does not modify, alter, change or whatever synonym you'd like your Adsense / YPN code. It just adds criteria to decide if you want to show them or not.
+Yes. It does not modify, alter, change or whatever synonym you'd like your Adsense / YPN code.
 
 = Why would I want not to show ads? I want more money! =
 
