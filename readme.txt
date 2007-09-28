@@ -5,7 +5,7 @@ Requires at least: 2.0
 Tested up to: 2.3
 Stable tag: trunk
 
-Manage your ads. Define what condition should activate them (visitor from search engine...). Make more money.
+Manage your ads. Define under what condition they will show (visitor from search engine, old post..). Make more money.
 
 == Description ==
 
@@ -15,7 +15,7 @@ For instance, you could consider the following criteria: Is the visitor a regula
 
 The plugin allows for easily creating display rules with a very advanced user interface.
 
-For a more detailed documentation, demo of the interface, and for example of advanced usages of the plugin, please visit its official page: [Who Sees Ads](http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ "Who Sees Ads")
+For a more detailed documentation, demo of the interface, and examples of advanced usages of the plugin, please visit its official page: [Who Sees Ads](http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ "Who Sees Ads")
 
 == Installation ==
 
