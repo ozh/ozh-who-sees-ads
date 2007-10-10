@@ -3,20 +3,21 @@
 Plugin Name: Who Sees Ads ?
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money.
-Version: 1.2.1
+Version: 1.2.2
 Author: Ozh
 Author URI: http://planetozh.com/
 */
 
 /* Release History
-   1.0	Initial release. Won 4th spot at WordPress Plugin Competition 2007 \o/
-   1.01	fixed: small glitch with PHP < 5.x preventing a cookie to be set (thanks Andrew Flusche)
-   1.2	improved: overall security against utterly improbable XSS attempt
-		added: 'Logged in users' as a context condition
-		added: 'Between 2 dates' as a context condition
-		added: 'Number of views' as a context condition
-		added: 'Fall back to another context' as a context condition
-   1.2.1 fixed: javascript bug with WordPress 2.3		
+   1.0	 Initial release. Won 4th spot at WordPress Plugin Competition 2007 \o/
+   1.01	 fixed: small glitch with PHP < 5.x preventing a cookie to be set (thanks Andrew Flusche)
+   1.2	 improved: overall security against utterly improbable XSS attempt
+		 added: 'Logged in users' as a context condition
+		 added: 'Between 2 dates' as a context condition
+		 added: 'Number of views' as a context condition
+		 added: 'Fall back to another context' as a context condition
+   1.2.1 fixed: javascript bug with WordPress 2.3
+   1.2.2 added: support for WP-Contact-Form's terrible & malformed code :P
 */
 
 $wp_ozh_wsa['iknowphp'] = true;
@@ -331,7 +332,7 @@ function wp_ozh_wsa_init() {
 
 function wp_ozh_wsa_addmenu() {
 	global $wp_ozh_wsa;
-        wp_enqueue_script('scriptaculous');
+	wp_enqueue_script('scriptaculous');
 	require_once(ABSPATH.'wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/wp_ozh_whoseesads_admin.php');
 	add_options_page('Who Sees Ads ?', 'Who Sees Ads', 10, wp_ozh_wsa_plugin_basename(__FILE__), 'wp_ozh_wsa_addmenupage');
 }

@@ -13,7 +13,7 @@ function wp_ozh_wsa_addmenupage() {
 	
 	wp_ozh_wsa_print_css();
 	
-	if (@$_POST) wp_ozh_wsa_processforms();
+	if (isset($_POST['whoseesads']) && ($_POST['whoseesads'] == 1) ) wp_ozh_wsa_processforms();
 	
 	wp_ozh_wsa_print_help();
 	wp_ozh_wsa_print_context();
@@ -128,7 +128,8 @@ function wp_ozh_wsa_print_context() {
 	<h2>Edit Context</h2>
 	<form method="post" action="" id="ozh_wsa_form_add" onsubmit="return ozh_wsa_check();">';
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
-	echo '<input type="hidden" name="action" value="add">
+	echo '<input type="hidden" name="action" value="add"/>
+	<input type="hidden" name="whoseesads" value="1"/>
 	<table border="0" id="wsa_table" cellspacing="5"><tr>
 	<td valign="top" class="wsa_celltitle">Name of the Context <span class="wsa_helpicon" id="helpicon_name">'; echo $help; echo '</span></td>
 	<td valign="top">';
@@ -263,6 +264,7 @@ function wp_ozh_wsa_print_help() {
 	<form method="post" name="wizard1" action="">';
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
 	echo '<input type="hidden" name="action" value="wizard"/>
+	<input type="hidden" name="whoseesads" value="1"/>
 	<input type="hidden" name="context_sel_wizard" value="ozh_wsa_wizard"/>
 	<input type="hidden" name="context" value="example-sidebar"/>
 	<input type="hidden" name="ozh_wsa_wizard_any" value="1"/>
@@ -290,6 +292,7 @@ function wp_ozh_wsa_print_help() {
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
 	echo '<input type="hidden" name="action" value="wizard"/>
 	<input type="hidden" name="context_sel_wizard" value="ozh_wsa_wizard"/>
+	<input type="hidden" name="whoseesads" value="1"/>
 	<input type="hidden" name="context" value="example-post-bottom"/>
 	<input type="hidden" name="ozh_wsa_wizard_any" value="1"/>
 	<input type="hidden" name="ozh_wsa_wizard_any_display" value="true"/>
@@ -330,6 +333,7 @@ function wp_ozh_wsa_print_duplicate() {
 
 	echo '
 	<form method="post" id="ozh_wsa_form_duprename" onsubmit="return (ozh_wsa_duprename_check());" action="">
+	<input type="hidden" name="whoseesads" value="1"/>
 	<input type="hidden" id="wsa_duprename" name="action" value="">
 	<select id="duprename_source" name="source" style="padding:3px">
 	';
@@ -373,6 +377,7 @@ function wp_ozh_wsa_print_delete() {
 	echo '
 	<form method="post" id="ozh_wsa_form_delete" action="">
 	<input type="hidden" name="action" value="delete">
+	<input type="hidden" name="whoseesads" value="1"/>
 	<ul class="wsa_del">
 	';
 
@@ -418,7 +423,9 @@ PAYPAL;
 	<form id=\"ozh_wsa_form_toggle\" method=\"post\">Display the short explanation &amp; wizards at the top of this page 
 	<input type=\"hidden\" name=\"action\" value=\"help\"/><input type=\"checkbox\" $checked name=\"toggle\" value=\"1\" onclick=\"$('ozh_wsa_form_toggle').submit()\"/>";
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
-	echo "</form>
+	echo "
+	<input type=\"hidden\" name=\"whoseesads\" value=\"1\"/>
+	</form>
 	<p>$paypal Does this plugin make you happy? Do you find it useful? If you think this plugin helps you monetize your blog, please consider donating. I've spent countless hours developing and testing it, any donation of a few bucks or euros is really rewarding and keeps me motivated to release free plugins. <strong>Thank you for your support!</strong></p>
 	<p>If you like this plugin, check my other <a href='http://planetozh.com/blog/my-projects/'>WordPress related stuff</a>!</p>
 	</div>\n";
@@ -679,6 +686,7 @@ function wp_ozh_wsa_print_definitions() {
 HTML;
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
 	echo <<<HTML
+	<input type="hidden" name="whoseesads" value="1"/>
     <input type="hidden" name="action" value="definitions">
     <p>An "<strong>old post</strong>" is a post or page which has been posted more than <input type="text" class="code" value="$old" name="old" size="3"> days ago (you can fine tune this on a per context basis)</p>
 	<p>A "<strong>regular reader</strong>" is someone who has viewed at least <input type="text" class="code" value="$reg_num" name="regular_num" size="3"> pages over the last <input type="text" class="code" value="$reg_days" name="regular_days" size="3"> days</p>
