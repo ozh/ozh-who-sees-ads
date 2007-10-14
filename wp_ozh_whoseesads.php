@@ -3,7 +3,7 @@
 Plugin Name: Who Sees Ads ?
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money.
-Version: 1.2.2
+Version: 1.3
 Author: Ozh
 Author URI: http://planetozh.com/
 */
@@ -18,6 +18,12 @@ Author URI: http://planetozh.com/
 		 added: 'Fall back to another context' as a context condition
    1.2.1 fixed: javascript bug with WordPress 2.3
    1.2.2 added: support for WP-Contact-Form's terrible & malformed code :P
+   1.3	 added: support for external custom option file
+		 added: support for Widgets (code heavily based on Denis de Bernardy's work & suggestions)
+		 added: smart support for WP-Cache plugin (simple yet efficient idea from Denis de Bernardy)
+		 added: 'Number of views by a particular visitor' (suggestion and code by Paula Fugaro)
+		 fixed: smarter referral search engine patterns (thanks to XmasB)
+		 fixed: conflict between WSA and ShittyMCE Editor
 */
 
 $wp_ozh_wsa['iknowphp'] = true;
@@ -26,6 +32,8 @@ $wp_ozh_wsa['iknowphp'] = true;
 	// regarding how you'll use this and what you'll make of it. In other words: no support, warranty,
 	// responsability, mercy, answers or anything from me if this is set to 'true'.
 
+// Include personal prefs, if any
+if (file_exists(dirname(__FILE__).'/my_options.php')) include(dirname(__FILE__).'/my_options.php');
 	
 /**************** DO NOT EDIT, UNLESS YPN OR GOOGLE TOS CHANGE ******************/
 
@@ -46,13 +54,19 @@ define('OZH_WSA_MAX_YPN_AD',3);
 
 /**************** DO NOT EDIT ******************/
 
+if (isset($wp_ozh_wsa['my_iknowphp']))
+	$wp_ozh_wsa['iknowphp'] = $wp_ozh_wsa['my_iknowphp'];
+
 // Init some stuff
-define('OZH_WSA_VER', '1.0');
 $wp_ozh_wsa['path'] = wp_ozh_wsa_plugin_basename(__FILE__);
 $wp_ozh_wsa['optionname'] = 'ozh_wsa';
 
 // Populate the array of possible conditions
-$wp_ozh_wsa['conditions'] = array ('fromSE', 'regular', 'olderthan', 'logged', 'date', 'numviews', 'fallback', 'any',);
+if (isset($wp_ozh_wsa['my_conditions'])) {
+	$wp_ozh_wsa['conditions'] = $wp_ozh_wsa['my_conditions'];
+} else {
+	$wp_ozh_wsa['conditions'] = array ('fromSE', 'regular', 'olderthan', 'logged', 'date', 'numviews', 'readerviews', 'fallback', 'any',);
+}
 if ($wp_ozh_wsa['iknowphp']) {
 	$wp_ozh_wsa['conditions'][] = 'on';
 	$wp_ozh_wsa['conditions'][] = 'noton';
@@ -66,9 +80,23 @@ function ozh_wsa($context) {
 	wp_ozh_wsa($context);
 }
 
+// The function you'll use.
+function wp_ozh_wsa($context, $echo = true) {
+	global $wp_ozh_wsa;
+	
+	if (!isset($wp_ozh_wsa['my_wp-cache']) or $wp_ozh_wsa['my_wp-cache'] !== false) {
+		$do_wpcache = $echo;
+	}
+
+	// Wrapper for WP-Cache
+	if ($do_wpcache) echo '<!--mfunc wp_ozh_wsa(\'' . $context . '\') -->';
+	wp_ozh_wsa_main($context, $echo);
+	if ($do_wpcache) echo '<!--/mfunc-->';
+}
+
 
 // The main function. Give it a context name, it'll echo the corresponding ad if applicable.
-function wp_ozh_wsa($context,$echo = true) {
+function wp_ozh_wsa_main($context,$echo = true) {
 	global $wp_ozh_wsa;
 	
 	// Default strings printed when no ad is shown
@@ -86,7 +114,7 @@ function wp_ozh_wsa($context,$echo = true) {
 	if (empty($rules)) {
 		if ($echo) {
 			echo $notfound;
-			return;
+			return $notfound;
 		} else {
 			return $notfound;
 		}
@@ -105,7 +133,7 @@ function wp_ozh_wsa($context,$echo = true) {
 		// On 404 pages, display nothing
 		if ($echo) {
 			echo $noton404;
-			return;
+			return $noton404;
 		} else {
 			return $noton404;
 		}
@@ -122,7 +150,7 @@ function wp_ozh_wsa($context,$echo = true) {
 		// we've had enough
 		if ($echo) {
 			echo $notmax;
-			return;
+			return $notmax;
 		} else {
 			return $notmax;
 		}
@@ -163,17 +191,17 @@ function wp_ozh_wsa($context,$echo = true) {
 				} else {
 					if ($echo) {
 						echo $code;
-						return;
+						return $code;
 					} else {
 						return $code;
 					}
 				}
 			
 			} else {
-				// We're told not to display
+				// We've been explicitely told not to display
 				if ($echo) {
 					echo $notdisplayed;
-					return;
+					return $notdisplayed;
 				} else {
 					return $notdisplayed;
 				}
@@ -184,7 +212,7 @@ function wp_ozh_wsa($context,$echo = true) {
 	// Up to this point means we've had rules, but no one matched
 	if ($echo) {
 		echo $notapplied;
-		return;
+		return $notapplied;
 	} else {
 		return $notapplied;
 	}
@@ -223,6 +251,9 @@ function wp_ozh_wsa_testrule($condition, $param, $context = '') {
 	case 'numviews':
 		return wp_ozh_wsa_numview($param, $context);
 		break;
+	case 'readerviews':
+		return wp_ozh_wsa_readerview($param, $context);
+		break;
 	case 'fallback':
 		return wp_ozh_wsa($param);
 		break;
@@ -238,7 +269,7 @@ function wp_ozh_wsa_testrule($condition, $param, $context = '') {
 		break;
 	// oops ?
 	default:
-		die("Unknown condition used in plugin Who Sees Ads. Condition used was: <b>$contition</b>"); // should never happen anyway
+		return ("Unknown condition used in plugin Who Sees Ads. Condition used was: <b>$condition</b>"); // should never happen anyway
 	}
 }
 
@@ -307,7 +338,7 @@ function wp_ozh_wsa_adsenseplugins($code,$echo = true) {
 	}
 }
 
-
+// Wrapper function for 3rd party plugins.
 function wp_ozh_wsa_adsenseplugins_get($plugin, $ad, $echo) {
 	if ($echo) {
 		call_user_func($plugin, $ad);
@@ -323,6 +354,7 @@ function wp_ozh_wsa_adsenseplugins_get($plugin, $ad, $echo) {
 
 /************** ADMIN FUNCTIONS ******************/
 
+// The 'onload' stuff
 function wp_ozh_wsa_init() {
 	wp_ozh_wsa_readoptions();
 	if (!is_admin()) {
@@ -330,17 +362,31 @@ function wp_ozh_wsa_init() {
 	}	
 }
 
+// Add a page to the Admin area
 function wp_ozh_wsa_addmenu() {
-	global $wp_ozh_wsa;
-	wp_enqueue_script('scriptaculous');
+	global $wp_ozh_wsa, $plugin_page, $pagenow;
+	if (is_plugin_page() && strpos($plugin_page, 'whoseesads') !== false) {
+		// add Scriptaculous & co only on the plugin page
+		wp_enqueue_script('scriptaculous');
+	}
 	require_once(ABSPATH.'wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/wp_ozh_whoseesads_admin.php');
-	add_options_page('Who Sees Ads ?', 'Who Sees Ads', 10, wp_ozh_wsa_plugin_basename(__FILE__), 'wp_ozh_wsa_addmenupage');
+
+	// Add submenu page where applicable 
+	if (isset($wp_ozh_wsa['my_menu'])) {
+		add_submenu_page($wp_ozh_wsa['my_menu'], 'Who Sees Ads ?', 'Who Sees Ads', 10, wp_ozh_wsa_plugin_basename(__FILE__), 'wp_ozh_wsa_addmenupage');
+		$wp_ozh_wsa['admin_url'] = get_option('siteurl') . '/wp-admin/'.$wp_ozh_wsa['my_menu'].'?page=' . wp_ozh_wsa_plugin_basename(__FILE__);
+	} else {
+		add_options_page('Who Sees Ads ?', 'Who Sees Ads', 10, wp_ozh_wsa_plugin_basename(__FILE__), 'wp_ozh_wsa_addmenupage');
+		$wp_ozh_wsa['admin_url'] = get_option('siteurl') . '/wp-admin/options-general.php?page=' . wp_ozh_wsa_plugin_basename(__FILE__);
+	}
+	
 }
 
 // Save options
 function wp_ozh_wsa_saveoptions() {
 	global $wp_ozh_wsa;
 
+	// Of course and as usual with Clean Plugins(tm) we're storing everything into ONE database entry.
 	$options = array(
 		'contexts' => $wp_ozh_wsa['contexts'],						// array of context rules
 		'old' => intval($wp_ozh_wsa['old']),						// default value for "old post"
@@ -415,14 +461,10 @@ function wp_ozh_wsa_readoptions() {
 	
 }
 
-function wp_ozh_wsa_wphead() {
-	echo "\n".'<!-- Powered by Who Sees Ads Plugin v' . OZH_WSA_VER . ' by Ozh - http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ -->' . "\n";
-}
-
 
 /************** INTERNAL FUNCTIONS ******************/
 
-// Built in function plugin_basename() is broken for Win32 installs, as of wp 2.2
+// Built in function plugin_basename() is broken for Win32 installs, as of WP 2.2 -- the following is added to WordPress core in 2.3
 function wp_ozh_wsa_plugin_basename($file) {
 	$file = str_replace('\\','/',$file); // sanitize for Win32 installs
 	$file = preg_replace('|/+|','/', $file); // remove any duplicate slash
@@ -444,10 +486,13 @@ function wp_ozh_wsa_olderthan($limit) {
 // Checks if a visitor's referrer shows a search engine. Returns boolean
 function wp_ozh_wsa_is_fromsearchengine() {
 	$ref = $_SERVER['HTTP_REFERER'];
-	$SE = array('google.', 'web.info.com',
-		'search.', 'del.icio.us/search',
-		'soso.com', '/search/', '.yahoo.',
-	);
+	if (isset($wp_ozh_wsa['my_search_engines'])) {
+		$SE = $wp_ozh_wsa['my_search_engines'];
+	} else {
+		$SE = array('/search?', 'images.google.', 'web.info.com', 'search.', 'del.icio.us/search',
+		'soso.com', '/search/', '.yahoo.', 
+		);
+	}
 	foreach ($SE as $url) {
 		if (strpos($ref,$url)!==false) return true;
 	}
@@ -473,6 +518,44 @@ function wp_ozh_wsa_numview($views, $context) {
 	}
 }
 
+// Checks if current visitor had less than $views of context. Returns boolean
+// Suggestion and code by Paula Fugaro (http://ezexpertwebtools.com/) 
+function wp_ozh_wsa_readerview($contextviews, $context) {
+
+	if (isset($_COOKIE['wp_ozh_wsa_'.$context])) {
+		$readerviews = $_COOKIE['wp_ozh_wsa_'.$context];
+	} else {
+		$readerviews = 0;
+	}
+	
+	if ($readerviews < $contextviews) {
+		$readerviews++;
+        $url = parse_url(get_option('home'));
+        $path = $url['path'].'/';
+        // Must set cookie using Javascript since 
+        // output has already been sent to the browser
+        echo "<script type=\"text/javascript\">
+                <!--
+                function FixCookieDate (date) {
+                  var base = new Date(0);
+                  var skew = base.getTime(); // dawn of (Unix) time - should be 0
+                  if (skew > 0)  // Except on the Mac - ahead of its time
+                    date.setTime (date.getTime() - skew);
+                }
+                
+                var expdate = new Date ();
+                FixCookieDate (expdate);
+                expdate.setTime (expdate.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year from now 
+                
+                document.cookie = \"wp_ozh_wsa_$context\" + \"=\" + escape ($readerviews) + \"; expires=\" + expdate.toGMTString() + \"; path=\" + \"$path\";
+                //-->
+                </script>
+                ";
+		return true;
+	} else {
+		return false;
+	}
+}
 
 // Checks if today's date is between a date interval. Returns boolean
 // @input $date array('before'=>timestamp, 'after'=>timestamp)
@@ -483,7 +566,7 @@ function wp_ozh_wsa_testdate($date) {
 }
 
 
-// Checks if a visitor is a regular visitor. Return boolean
+// Checks if a visitor is a regular visitor. Returns boolean
 function wp_ozh_wsa_regularvisitor() {
 	global $wp_ozh_wsa;
 	
@@ -591,8 +674,8 @@ function wp_ozh_wsa_googlead_dimensions($code) {
 	preg_match_all('/google_ad_(width|height) *= *([\d]+) *;/',strtolower($code),$matches);
 	${$matches[1][0]} = $matches[2][0];
 	${$matches[1][1]} = $matches[2][1];
-	return array($width,$height);
 	// weeeeeeee ! How cool was it ? :)
+	return array($width,$height);
 }
 
 // Returns an appropriate font-size for a given width
@@ -610,6 +693,13 @@ function wp_ozh_wsa_fontsize($width,$factor,$max,$min) {
 
 // Prints CSS for fake google ads
 function wp_ozh_wsa_fakegooglead_css() {
+
+	global $wp_ozh_wsa;
+	if (isset($wp_ozh_wsa['my_fakead-css'])) {
+		echo $wp_ozh_wsa['my_fakead-css'] ;
+		return;
+	}
+
 	$out = '#006E2E';
 	$mid = '#008C00';
 	$in = '#6BBA70';
@@ -679,18 +769,34 @@ function wp_ozh_wsa_fakegooglead($dimensions = array(125,125),$type='google',$wh
 		$wp_ozh_wsa['google_css'] = true;
 		wp_ozh_wsa_fakegooglead_css();
 	}
+
+	$div = '';
 	
-	$div = "
-	<div class='wsa_ad_out' style='width:${width}px;height:${height}px;max-width:100%;max-height:100%;'>
-	<div class='wsa_ad_center'>
-	<div class='wsa_ad_in' style='height:$inheight;'>
-	<p class='p1' style='font-size:$font;'><b>Ad Placeholder</b></p>
-	<p class='p2' style='font-size:$font2;'>$type ad disabled ($why) by <a href='http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/'>Who Sees Ads</a>. Regular visitors will see real $type ads.</p>
-	</div>
-	</div>
-	</div>	
-	";
+	if (isset($wp_ozh_wsa['my_fakead-before']))
+		$div .= $wp_ozh_wsa['my_fakead-before'];
+		
+	if (isset($wp_ozh_wsa['my_fakead'])) {
+		$fakead = $wp_ozh_wsa['my_fakead'];
+		foreach (array('width', 'height', 'why', 'type', 'font', 'font2', 'inheight') as $item) {
+			$fakead = str_replace("%%${item}%%", ${$item}, $fakead);
+		}
+		$div .= $fakead;
+	} else {	
+		$div .= "
+		<div class='wsa_ad_out' style='width:${width}px;height:${height}px;max-width:100%;max-height:100%;'>
+		<div class='wsa_ad_center'>
+		<div class='wsa_ad_in' style='height:$inheight;'>
+		<p class='p1' style='font-size:$font;'><b>Ad Placeholder</b></p>
+		<p class='p2' style='font-size:$font2;'>$type ad disabled ($why) by <a href='http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/'>Who Sees Ads</a>. Regular visitors will see real $type ads.</p>
+		</div>
+		</div>
+		</div>	
+		";
+	}
 	
+	if (isset($wp_ozh_wsa['my_fakead-after']))
+		$div .= $wp_ozh_wsa['my_fakead-after'];
+
 	if ($echo) {
 		echo $div;
 	} else {
@@ -708,10 +814,45 @@ function wp_ozh_wsa_is_admin() {
 }
 
 
+/************** WIDGET FUNCTIONS ******************/
+
+// Conditional widget enabling
+function wp_ozh_wsa_maybe_widgetize() {
+	global $wp_ozh_wsa;
+	if (!isset($wp_ozh_wsa['my_menu']) or $wp_ozh_wsa['my_menu'] !== false) {
+		$wp_ozh_wsa['do_widgets'] = true;
+		add_action('widgets_init', 'wp_ozh_wsa_widgetize');
+	}
+}
+
+// Create Widgets
+function wp_ozh_wsa_widgetize() {
+	global $wp_ozh_wsa;
+	
+	foreach ( array_keys($wp_ozh_wsa['contexts']) as $context ) {
+		register_sidebar_widget('Ad: ' . $context,
+			create_function(
+				'$args',
+				'wp_ozh_wsa(\'' . $context . '\', $args);'
+				)
+			);
+		register_widget_control('Ad: ' . $context, 'wp_ozh_wsa_widget_control', 200, 100);
+	}
+}
+
+// Create Widget (sort of) controls
+function wp_ozh_wsa_widget_control() {
+	global $wp_ozh_wsa;
+	echo 'Configure and set up display rules on the <a href="'.$wp_ozh_wsa['admin_url'].'">Who Sees Ads</a> administration page';
+}
+
+
 /********************************************************/
 
-add_action('init','wp_ozh_wsa_init');
-add_action('admin_menu', 'wp_ozh_wsa_addmenu');
-add_action('the_content', 'wp_ozh_wsa_filter');
+add_action('plugins_loaded', 'wp_ozh_wsa_init');
+add_action('plugins_loaded', 'wp_ozh_wsa_maybe_widgetize');
+add_action('admin_menu',     'wp_ozh_wsa_addmenu');
+add_action('the_content',    'wp_ozh_wsa_filter');
+
 
 ?>

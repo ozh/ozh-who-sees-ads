@@ -1,6 +1,6 @@
 <?php
 /*
-This file is part of the Wordpress Plugin: Who Sees Ads ?
+This file is part of the Wordpress Plugin "Who Sees Ads"
 It contains what's needed for the (uber mega sexy) administration menu
 See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 */
@@ -37,12 +37,15 @@ function wp_ozh_wsa_addbutton() {
 		
 	global $wp_ozh_wsa;
 	
+	if (isset($wp_ozh_wsa['my_wsa-buttons']) && $wp_ozh_wsa['my_wsa-buttons'] === false)
+		return;
+	
 	switch (count($wp_ozh_wsa['contexts'])) {
 	case 0:
 		return;
 
+	// Only one context is defined: we'll print a single button
 	case 1:
-		// Only one context is defined: we'll print a single button
 		$keys = array_keys($wp_ozh_wsa['contexts']);
 		$context = $keys[0];
 		echo <<<JS
@@ -56,6 +59,7 @@ function wp_ozh_wsa_addbutton() {
 JS;
 		break;
 
+	// More than one button ? Let's add a dropdown list
 	default:
 		$buttons = "var length = edButtons.length;\n var wsa_list = new Array();\n";
 		$html = "<select id='ozh_wsa_select' class='ed_button' onchange='wsa_select(this)' title='Select context'><option value=''>Who Sees Ads:</option>";
@@ -147,13 +151,13 @@ function wp_ozh_wsa_print_context() {
 	<td valign="bottom" class="wsa_cell" id="wsa_active_rules">
 	';
 	
-	// Sortable : possible conditions
+	// Sortable 1 : possible conditions
 	wp_ozh_wsa_print_sortable(1,$new);
 		
 	echo '</td>
 	</tr><tr><td valign="top" class="wsa_celltitle">Active Rules <span class="wsa_helpicon" id="helpicon_active">'; echo $help; echo '</span></td><td valign="top" class="wsa_cell">';
 
-	// Sortable : active conditions
+	// Sortable 2 : active conditions
 	wp_ozh_wsa_print_sortable(2,$new);
 
 	echo '
@@ -321,7 +325,7 @@ function wp_ozh_wsa_print_duplicate() {
 	
 	if ($wp_ozh_wsa['contexts']) {
 		$contexts = array_keys($wp_ozh_wsa['contexts']);
-		array_shift($contexts);
+		array_shift($contexts); // first context is always the new123456 temporary one
 	}
 	
 	if (!$contexts) return;
@@ -399,7 +403,7 @@ function wp_ozh_wsa_print_delete() {
 	
 }
 
-// Print the misc footer info & form
+// Print the misc footer info & form. Please leave this untouched !
 function wp_ozh_wsa_print_misc() {
 	global $wp_ozh_wsa;
 	
@@ -426,7 +430,7 @@ PAYPAL;
 	echo "
 	<input type=\"hidden\" name=\"whoseesads\" value=\"1\"/>
 	</form>
-	<p>$paypal Does this plugin make you happy? Do you find it useful? If you think this plugin helps you monetize your blog, please consider donating. I've spent countless hours developing and testing it, any donation of a few bucks or euros is really rewarding and keeps me motivated to release free plugins. <strong>Thank you for your support!</strong></p>
+	<p>$paypal Does <a href='http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/'>Who Sees Ads</a> make you happy? Do you find it useful? If you think this plugin helps you monetize your blog, please consider donating. I've spent countless hours developing and testing it, any donation of a few bucks or euros is really rewarding and keeps me motivated to release free plugins. <strong>Thank you for your support!</strong></p>
 	<p>If you like this plugin, check my other <a href='http://planetozh.com/blog/my-projects/'>WordPress related stuff</a>!</p>
 	</div>\n";
 }
@@ -493,7 +497,7 @@ function wp_ozh_wsa_print_sortable_item($item,$context,$list) {
 	case 'olderthan':
 		$old = wp_ozh_wsa_get_parameter($context,'olderthan');
 		if ($old === false) $old = $wp_ozh_wsa['old'];
-		$old = intval($old); // sanitize: only integers
+		$old = intval($old); // sanitize: accept only integers
 		$text = "Post is older than <input type='text' name='${context}_olderthan' size='3' value='$old'/> days";
 		break;
 	
@@ -526,9 +530,20 @@ function wp_ozh_wsa_print_sortable_item($item,$context,$list) {
 		if (!$views) $views = 1000;
 		$numviews = $wp_ozh_wsa['contexts'][$context]['views'];
 		if ($numviews) $numviews = "(currently: $numviews views)";
-		$text = "Ad viewed &lt;=  <input type='text' name='${context}_numviews' size='3' value='$views'/> times $numviews";
+		$text = "Ad displayed &lt;=  <input type='text' name='${context}_numviews' size='3' value='$views'/> times $numviews";
 		break;
 	
+	// Suggestion and code by Paula Fugaro (http://ezexpertwebtools.com/) 
+	case 'readerviews':
+		$contextviews = intval(wp_ozh_wsa_get_parameter($context,'readerviews'));
+		if (!$contextviews) $contextviews = 1000;
+        if (isset($_COOKIE['wp_ozh_wsa_'.$context])) {
+            $readerviews = $_COOKIE['wp_ozh_wsa_'.$context];
+        }
+		if ($readerviews) $readerviews = "(you: $readerviews views)";
+		$text = "Ad viewed by visitor &lt;=  <input type='text' name='${context}_readerviews' size='3' value='$contextviews'/> times $readerviews";
+		break;
+
 	case 'fallback':
 
 		if (count($wp_ozh_wsa['contexts'])>=3 or (count($wp_ozh_wsa['contexts']) == 2 && $context == $wp_ozh_wsa['newcontext'])) {
@@ -1257,6 +1272,7 @@ function wp_ozh_wsa_processforms_delete() {
 	global $wp_ozh_wsa;
 
 	foreach($_POST['del_context'] as $context) {
+		if ($wp_ozh_wsa['do_widgets']) wp_ozh_wsa_widget_deleterename($context);
 		unset($wp_ozh_wsa['contexts'][$context]);
 		wp_ozh_wsa_check_fallback($context);
 	}
@@ -1288,6 +1304,7 @@ function wp_ozh_wsa_processforms_duprename() {
 
 	$wp_ozh_wsa['contexts'][$dest] = $wp_ozh_wsa['contexts'][$source];
 	if ($_POST['action'] == 'rename') {
+		if ($wp_ozh_wsa['do_widgets']) wp_ozh_wsa_widget_deleterename($source, $dest);
 		unset($wp_ozh_wsa['contexts'][$source]);
 		$action = 'renamed';
 		wp_ozh_wsa_check_fallback($source, $dest);
@@ -1299,6 +1316,27 @@ function wp_ozh_wsa_processforms_duprename() {
 	
 	return "Context <b>$source</b> $action to <b>$dest</b>";
 	
+}
+
+// Rename or delete widgets affected by context deleting or renaming
+function wp_ozh_wsa_widget_deleterename($source, $dest = '') {
+	$source = 'ad-' . $source;
+	if ($dest) $dest = 'ad-' . $dest;
+	$sidebars = get_option('sidebars_widgets');
+	foreach ( array_keys($sidebars) as $sidebar_id ) {
+		if ( is_array($sidebars[$sidebar_id]) 
+			&& ( $key = array_search($source, $sidebars[$sidebar_id]) ) !== false
+		) {
+			if ($dest) {
+				$sidebars[$sidebar_id][$key] = $dest;
+			} else {
+				unset($sidebars[$sidebar_id][$key]);
+				// wtf. I didn't understand how to use the widget API with something like unregister_sidebar_widget().
+			}
+			break;
+		}
+	}
+	update_option('sidebars_widgets', $sidebars);
 }
 
 // Check if any 'fallback' condition is affected upon rename or delete of a context
@@ -1411,18 +1449,12 @@ function wp_ozh_wsa_date_convert($date,$format) {
 // @input $date A timestamp
 // @input $format The preferred format as stored in options ('dmy' or 'mdy')
 function wp_ozh_wsa_date_convert_todate($date,$format) {
-
-	//var_dump($date);
-	//var_dump($format);
-
 	if ($format == 'dmy') {
 		$format = 'd/m/Y';
 	} else {
 		$format = 'm/d/Y';
 	}
-
 	return date($format,$date);
-
 }
 
 // Context name sanitization
