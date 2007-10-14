@@ -50,7 +50,7 @@ function wp_ozh_wsa_addbutton() {
 		$context = $keys[0];
 		echo <<<JS
 		<script type="text/javascript">
-		<!--
+		/* <![CDATA[ */
 		if(ozh_wsa_Toolbar = document.getElementById("ed_toolbar")) {
 			var length = edButtons.length;
 			edButtons[length] = new edButton('ozh_wsa', '$context','<!--wsa:$context-->','','');
@@ -74,7 +74,7 @@ JS;
 		$html .= '</select>';
 		echo <<<JS
 		<script type="text/javascript">
-		<!--
+		/* <![CDATA[ */
 		if(ozh_wsa_Toolbar = document.getElementById("ed_toolbar")) {
 			$buttons
 			ozh_wsa_Toolbar.innerHTML += "$html";
@@ -95,7 +95,7 @@ JS;
 	}
 	
 	
-	//-->
+	/* ]]> */
 </script>
 JS;
 }
