@@ -31,9 +31,6 @@ See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-
 /* Disable widget support */
 // $wp_ozh_wsa['my_widgets'] = false;
 
-/* Disable WP-Cache support */
-// $wp_ozh_wsa['my_wp-cache'] = false;
-
 /* Disable additional buttons in the "Write Post / Page" interface */
 // $wp_ozh_wsa['my_wsa-buttons'] = false;
 
