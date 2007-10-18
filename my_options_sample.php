@@ -16,6 +16,12 @@ See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-
 /* Override the ['iknowphp'] variable */
 // $wp_ozh_wsa['my_iknowphp'] = false;
 
+/* Height of textarea for pasting code in. Must be a proper CSS value */
+// $wp_ozh_wsa['my_codetextarea'] = '220px';
+
+/* Support for multiple code in a single context, to be randomly picked (rotated) */
+// $wp_ozh_wsa['my_rotatecode_separator'] = '**** CODE ****'
+
 /* List of custom search engines. Overrides, does not add to original list */
 // $wp_ozh_wsa['my_search_engines'] = array('/search?', 'images.google.', 'web.info.com', 'search.', 'del.icio.us/search', 'soso.com', '/search/', '.yahoo.', );
 

@@ -169,6 +169,10 @@ function wp_ozh_wsa_print_context() {
 	
 	wp_ozh_wsa_print_contextcode($new);
 	
+	if (isset($wp_ozh_wsa['my_rotatecode_separator'])) {
+		echo "<span style='color:#aae'>Rotating code separator:</span> <tt style='color:#99c'>${wp_ozh_wsa['my_rotatecode_separator']}</tt>";
+	}	
+
 	$ok = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/ok.gif';
 	
 	echo '</td>
@@ -177,6 +181,20 @@ function wp_ozh_wsa_print_context() {
 	<td valign="top" class="wsa_celltitle">Optional Comment <span class="wsa_helpicon" id="helpicon_comment">'; echo $help; echo '</span></td><td valign="top">';
 		
 	wp_ozh_wsa_print_contextcomment($new);
+	
+	if (isset($wp_ozh_wsa['my_rotatecode_separator'])) {
+		$rotatecode = "
+		<p>Support for rotating code is enabled. Paste multiple codes using the following separator: <b>${wp_ozh_wsa['my_rotatecode_separator']}</b><br/>
+		<b>Example:</b><br/>
+		<tt>&lt;img src='banner1.gif' /&gt;<br/>
+		${wp_ozh_wsa['my_rotatecode_separator']}<br/>
+		&lt;img src='banner2.gif' /&gt;<br/>
+		${wp_ozh_wsa['my_rotatecode_separator']}<br/>
+		&lt;img src='banner3.gif' /&gt;</tt></p>
+		";
+	} else {
+		$rotatecode = '';
+	}
 	
 	echo '</td><td valign="top">
 	
@@ -220,7 +238,9 @@ function wp_ozh_wsa_print_context() {
 	<div class="wsa_helpbox" id="helpbox_code" style="display:none">
 		<h3>Code</h3>
 		<p>Paste the ad for your code, as you would paste it in an HTML or PHP document.</p>
-		<p>It can be HTML (like an affiliate banner) or Javascript (like an Adsense ad)</p>
+		<p>It can be HTML (like an affiliate banner) or Javascript (like an Adsense ad)</p>';
+	echo $rotatecode;
+	echo '
 	</div>
 	<div class="wsa_helpbox" id="helpbox_custom" style="display:none">
 		<h3>Advanced Custom Rules</h3>
@@ -608,7 +628,7 @@ function wp_ozh_wsa_print_sortable_item($item,$context,$list) {
 	
 	$text = "<tt>if</tt> $text ";
 	if ( $item != 'fallback') {
-		$text .= "<tt>$then</tt><select style='font-size:11px' id='${context}_${item}_display' class='wsa_display_drop' name='${context}_${item}_display'>
+		$text .= "<tt>$then</tt><select id='${context}_${item}_display' class='wsa_display_drop' name='${context}_${item}_display'>
 		<option $selected_true value='true'>display</option>
 		<option $selected_false value='false'>dont display</option>
 		</select>$after";
@@ -689,9 +709,40 @@ function wp_ozh_wsa_print_definitions() {
 		$checked_dmy	 = '';
 	}
 	
+	// List of users with publishing rights, if applicable. FIXME: should be ok, might not be completely foolproof regarding Roles.
+	// Get list of authors
+	$authors = get_author_user_ids();
+	$dropdown_options = array(
+		'class' => 'wsa_display_drop',
+		'echo' => false, 'name' => 'admin_id',
+		'include' => get_author_user_ids(),
+	);
+	// User currently registered as owner still in here ?
+	if (!in_array($wp_ozh_wsa['admin_id'], $authors)) {
+		$dropdown_options['show_option_none'] = 'Please select';
+		$dropdown_options['selected'] = '-1';
+	} else {
+		$dropdown_options['selected'] = $wp_ozh_wsa['admin_id'];
+	}
+	$admin_id = wp_dropdown_users( $dropdown_options );
+	
+	if (substr_count($admin_id, '<option value') == 1) {
+		// Only one user found : show nothing
+		preg_match("!<option value='(\d+)!", $admin_id, $matches);
+		$admin_id = '<input type="hidden" name="admin_id" value="'.$matches[1].'" />';
+		// This user_id must be the same as $wp_ozh_wsa['admin_id'] (prevent errors after user deleting)
+		if ($wp_ozh_wsa['admin_id'] != $matches[1]) {
+			$checked_on = $checked_off = '';
+			$admin_id .= '<span style="color:#f22">(Please <strong>update</strong> this option !)</span>';
+		}
+	} else {
+		// More than one user
+		$admin_id_display = ($wp_ozh_wsa['adsense_safety'] == 'on') ? 'inline' : 'none';
+		$admin_id = "<span id='admin_id_span' style='display:$admin_id_display'>for user $admin_id (blog / Adsense account owner)</span>";
+	}
+	
 	$help = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
 	$help = "<img src='$help' />";
-	
 	$ok = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/ok.gif';
 	
 	echo <<<HTML
@@ -708,7 +759,7 @@ HTML;
 	<p>The <strong>Admin Clicks Safety</strong><span class="wsa_helpicon" id="helpicon_adsense_safety">$help</span> option is
 	<input name="adsense_safety" id="adsense_safety_on" value="on" $checked_on type="radio"><label for="adsense_safety_on">Enabled</label>
 	<input name="adsense_safety" id="adsense_safety_off" value="off" $checked_off type="radio"><label for="adsense_safety_off">Disabled</label>
-	</p>
+	$admin_id</p>
 	<p>Your preferred <strong>Date format</strong> is 
 	<input name="date_format" id="date_format_dmy" value="dmy" $checked_dmy type="radio"><label for="date_format_dmy">dd/mm/yyyy</label>
 	<input name="date_format" id="date_format_mdy" value="mdy" $checked_mdy type="radio"><label for="date_format_mdy">mm/dd/yyyy</label>
@@ -988,6 +1039,15 @@ SORTABLE;
 		}
 	}
 	
+	// Toggle display list of blog users for Adsense Safety
+	if ($('admin_id_span')) {
+		$('adsense_safety_on').onclick = function() {
+			$('admin_id_span').style.display = 'inline';
+		};
+		$('adsense_safety_off').onclick = function() {
+			$('admin_id_span').style.display = 'none';
+		};
+	}
 	// ]]>
 	</script>
 JS;
@@ -998,6 +1058,12 @@ function wp_ozh_wsa_print_css() {
 global $wp_ozh_wsa;
 
 $images = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images';
+
+if (isset($wp_ozh_wsa['my_codetextarea'])) {
+	$textarea_height = $wp_ozh_wsa['my_codetextarea'];
+} else {
+	$textarea_height = '80px';
+}
 
 	echo <<<CSS
 <style type="text/css">
@@ -1013,6 +1079,9 @@ $images = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']
 }
 .wsa_listdel:hover {
 	color:#d00;
+}
+.wsa_display_drop {
+	font-size:10px;
 }
 .wsa_button {
 	background: url( images/fade-butt.png );
@@ -1062,7 +1131,7 @@ $images = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']
 }
 .wsa_code {
 	width:98%;
-	height:80px;
+	height:$textarea_height;
 	overflow:auto;
 	border:2px solid #ddf;
 	_border:2px solid #aae;
@@ -1198,6 +1267,7 @@ function wp_ozh_wsa_processforms_definitions() {
 	$wp_ozh_wsa['regular'] = array($_POST['regular_num'],$_POST['regular_days']);
 	$wp_ozh_wsa['adsense_safety'] = $_POST['adsense_safety'];
 	$wp_ozh_wsa['date_format'] = $_POST['date_format'];
+	$wp_ozh_wsa['admin_id'] = $_POST['admin_id'];
 
 	wp_ozh_wsa_saveoptions();
 	

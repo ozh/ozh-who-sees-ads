@@ -3,27 +3,34 @@
 Plugin Name: Who Sees Ads ?
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money.
-Version: 1.3
+Version: 1.3.2
 Author: Ozh
 Author URI: http://planetozh.com/
 */
 
 /* Release History
-   1.0	 Initial release. Won 4th spot at WordPress Plugin Competition 2007 \o/
-   1.01	 fixed: small glitch with PHP < 5.x preventing a cookie to be set (thanks Andrew Flusche)
-   1.2	 improved: overall security against utterly improbable XSS attempt
-		 added: 'Logged in users' as a context condition
+   1.0   Initial release. Won 4th spot at WordPress Plugin Competition 2007 \o/
+   1.01  fixed: small glitch with PHP < 5.x preventing a cookie to be set (thanks Andrew Flusche)
+   1.2   improved: overall security against utterly improbable XSS attempt
+		 added: 'Logged in user' as a context condition
 		 added: 'Between 2 dates' as a context condition
 		 added: 'Number of views' as a context condition
 		 added: 'Fall back to another context' as a context condition
    1.2.1 fixed: javascript bug with WordPress 2.3
    1.2.2 added: support for WP-Contact-Form's terrible & malformed code :P
-   1.3	 added: support for external custom option file
+   1.3   added: support for external custom option file
 		 added: support for Widgets (code heavily based on Denis de Bernardy's work & suggestions)
 		 added: smart support for WP-Cache plugin (simple yet efficient idea from Denis de Bernardy)
 		 added: 'Number of views by a particular visitor' (suggestion and code by Paula Fugaro)
 		 fixed: smarter referral search engine patterns (thanks to XmasB)
 		 fixed: conflict between WSA and ShittyMCE Editor
+   1.3.2 removed: support for WP-Cache. Support for dynamic parts in this plugin is totally broken. 
+		 fixed: <!--wsa:something--> wasn't working anymore. Oops! Sorry :)
+		 fixed: incorrect max adsense handling, incorrect fallback mode handling (all good catches and *excellent* bug report from Steffen Richter)
+		 added: support for rotating ads a la WPAds (my_options.php setting)
+		 added: option for login name for Adsense Safety (suggestion from Steffen)
+		 added: setting in my_options.php : code textarea height
+		 
 */
 
 $wp_ozh_wsa['iknowphp'] = true;
@@ -81,17 +88,25 @@ function ozh_wsa($context) {
 }
 
 // The function you'll use.
-function wp_ozh_wsa($context, $echo = true) {
+function wp_ozh_wsa($context, $echo = true, $fallback = false) {
 	global $wp_ozh_wsa;
 	
-	if (!isset($wp_ozh_wsa['my_wp-cache']) or $wp_ozh_wsa['my_wp-cache'] !== false) {
-		$do_wpcache = $echo;
+	/* Removed in 1.3.2
+	// If we're in a fallback context, we dont want nested <!--mfunc--> tags
+	if ($fallback == false && (!isset($wp_ozh_wsa['my_wp-cache']) or $wp_ozh_wsa['my_wp-cache'] !== false)) {
+		$do_wpcache = true;
+	} else {
+		$do_wpcache = false;
 	}
+	*/
 
-	// Wrapper for WP-Cache
-	if ($do_wpcache) echo '<!--mfunc wp_ozh_wsa(\'' . $context . '\') -->';
-	wp_ozh_wsa_main($context, $echo);
-	if ($do_wpcache) echo '<!--/mfunc-->';
+	$wsa = '';
+	//if ($do_wpcache) $wsa .= '<!--mfunc wp_ozh_wsa(\'' . $context . '\') -->';
+	$wsa .= wp_ozh_wsa_main($context, false);
+	//if ($do_wpcache) $wsa .= '<!--/mfunc-->';
+	
+	if ($echo) echo $wsa;
+	return $wsa;
 }
 
 
@@ -102,7 +117,7 @@ function wp_ozh_wsa_main($context,$echo = true) {
 	// Default strings printed when no ad is shown
 	$notdisplayed = "<!-- WSA: rules for context '$context' said: don't show ad -->";
 	$notapplied = "<!-- WSA: rules for context '$context' did not apply -->";
-	$notfound = "<!-- WSA: context '$context' not found -->";
+	$notfound  = "<!-- WSA: context '$context' not found -->";
 	$noton404 = "<!-- WSA: ad in context $context not shown: this is a 404 url -->";
 	$notmax = "<!-- WSA: ad in context $context not shown: too many ads -->";
 
@@ -110,14 +125,18 @@ function wp_ozh_wsa_main($context,$echo = true) {
 	$rules = $wp_ozh_wsa['contexts'][$context]['rules'];
 	$code = $wp_ozh_wsa['contexts'][$context]['adcode'];
 	
+	// Rotating ad support, a la WPAds
+	if (isset($wp_ozh_wsa['my_rotatecode_separator']) && strpos($code,$wp_ozh_wsa['my_rotatecode_separator']) !==false ) {
+		$_code = explode ($wp_ozh_wsa['my_rotatecode_separator'], trim($code, $wp_ozh_wsa['my_rotatecode_separator']));
+		// the trim($code, 'separator') ensures any leading or trailing separator is removed prior to exploding, so we get no empty item in array
+		$code = trim($_code[ mt_rand(0, count($_code) - 1) ]);
+		unset($_code);	
+	}
+	
 	// wrong context name ? 
 	if (empty($rules)) {
-		if ($echo) {
-			echo $notfound;
-			return $notfound;
-		} else {
-			return $notfound;
-		}
+		if ($echo) echo $notfound;
+		return $notfound;
 	}
 	
 	// get ad type, 'google', 'ypn' or false
@@ -125,60 +144,57 @@ function wp_ozh_wsa_main($context,$echo = true) {
 	
 	// Is this a 404 or a preview page
 	// If so, per Adsense and YPN TOS , don't display the ads.
-	if ( is_preview() and $$google_ypn ) {
+	if ( is_preview() and $google_ypn ) {
 		// On preview pages, display a placeholder
 		return wp_ozh_wsa_fakegooglead(wp_ozh_wsa_googlead_dimensions($code),wp_ozh_wsa_is_google_ypn_ad($code),'preview',$echo);
 	}
-	if ( is_404() and $$google_ypn ) {
+	if ( is_404() and $google_ypn ) {
 		// On 404 pages, display nothing
-		if ($echo) {
-			echo $noton404;
-			return $noton404;
-		} else {
-			return $noton404;
-		}
+		if ($echo) echo $noton404;
+		return $noton404;
 	}
 	
 	// Hide Adsense & YPN when maximum allowed number of ads has been exceeded
-	if (
-		( $wp_ozh_wsa['ypn_count']  >= OZH_WSA_MAX_YPN_AD ) or
-		( $wp_ozh_wsa['google_count'] ['ad'] >= OZH_WSA_MAX_GOOGLE_AD ) or
-		( $wp_ozh_wsa['google_count'] ['search'] >= OZH_WSA_MAX_GOOGLE_SEARCH ) or
-		( $wp_ozh_wsa['google_count'] ['links'] >= OZH_WSA_MAX_GOOGLE_LINKS ) or
-		( ( $wp_ozh_wsa['google_count'] ['reftext'] + $wp_ozh_wsa['google_count'] ['refimage'] ) >= OZH_WSA_MAX_GOOGLE_REF )		
-	) {
-		// we've had enough
-		if ($echo) {
-			echo $notmax;
-			return $notmax;
-		} else {
+	if ($google_ypn) {
+		$google_type = wp_ozh_wsa_google_ad_type($code);
+		$max_for_type = array('ad' => OZH_WSA_MAX_GOOGLE_AD,
+			'search' => OZH_WSA_MAX_GOOGLE_SEARCH,
+			'links' => OZH_WSA_MAX_GOOGLE_LINKS,
+			'reftext' => OZH_WSA_MAX_GOOGLE_REF);
+		if (
+			$wp_ozh_wsa['google_count'] [$google_type] >= $max_for_type[$google_type] or 
+			$wp_ozh_wsa['ypn_count']  >= OZH_WSA_MAX_YPN_AD ) {
+			// we've had enough of this type. Thanks Steffen for improvements here.
+			if ($echo) echo $notmax;
 			return $notmax;
 		}
 	}
 	
 	// Hide Adsense & YPN when viewed by admin ?
-	if ( wp_ozh_wsa_is_admin() and ($wp_ozh_wsa['adsense_safety'] == 'on') and $google_ypn ) {
+	if ( wp_ozh_wsa_is_admin($wp_ozh_wsa['admin_id']) and ($wp_ozh_wsa['adsense_safety'] == 'on') and $google_ypn ) {
 		// Display a placeholder
-		return wp_ozh_wsa_fakegooglead(wp_ozh_wsa_googlead_dimensions($code),wp_ozh_wsa_is_google_ypn_ad($code),'admin',$echo);
+		return wp_ozh_wsa_fakegooglead(wp_ozh_wsa_googlead_dimensions($code),wp_ozh_wsa_is_google_ypn_ad($code),'blog owner',$echo);
 	}
 	
 	// Now check each rule for this context
 	foreach($rules as $rule) {
 		// test if rule is matched
-		$test = wp_ozh_wsa_testrule($rule['condition'],$rule['parameter'],$context);
+		$test = wp_ozh_wsa_testrule($rule['condition'],$rule['parameter'],$context, $echo);
+
+		// On fallback mode, $test contains the fallback ad. Thanks Steffen for improvements here.
+		if( 'fallback' == $rule['condition'] ){
+			return $test;
+		}
 		
 		if ($test === true) {
 			// Rule is matched: should we display or not ?
 			if ($rule['display'] == 'true') {
 				// We're displaying!
 				
-				// Google or YPN ?
+				// Google or YPN ? Count ads displayed so far
 				if ($google_ypn == 'google') {
-					// Keep track of how many Adsense of each type we've already displayed so far
-					$google_type = wp_ozh_wsa_google_ad_type($code);
 					$wp_ozh_wsa['google_count'][$google_type] += 1;		
 				} elseif ($google_ypn == 'ypn') {
-					// Keep track of how many YPN ads we've already displayed so far
 					$wp_ozh_wsa['ypn_count'] += 1;
 				}
 
@@ -189,33 +205,21 @@ function wp_ozh_wsa_main($context,$echo = true) {
 					
 				// not Adsense or no plugin: just display the code
 				} else {
-					if ($echo) {
-						echo $code;
-						return $code;
-					} else {
-						return $code;
-					}
+					if ($echo) echo $code;
+					return $code;
 				}
 			
 			} else {
 				// We've been explicitely told not to display
-				if ($echo) {
-					echo $notdisplayed;
-					return $notdisplayed;
-				} else {
-					return $notdisplayed;
-				}
+				if ($echo) echo $notdisplayed;
+				return $notdisplayed;
 			}
 		}
 	}
 	
 	// Up to this point means we've had rules, but no one matched
-	if ($echo) {
-		echo $notapplied;
-		return $notapplied;
-	} else {
-		return $notapplied;
-	}
+	if ($echo) echo $notapplied;
+	return $notapplied;
 }
 
 // Parses text (content of post or page) to replace any <!--ozh_wsa:myad--> with the corresponding ad, if applicable
@@ -230,7 +234,7 @@ function wp_ozh_wsa_filter_callback($in) {
 }
 
 // Test rule, return boolean
-function wp_ozh_wsa_testrule($condition, $param, $context = '') {
+function wp_ozh_wsa_testrule($condition, $param, $context = '', $echo = true) {
 	switch($condition) {
 	// core rules
 	case 'fromSE':
@@ -255,7 +259,8 @@ function wp_ozh_wsa_testrule($condition, $param, $context = '') {
 		return wp_ozh_wsa_readerview($param, $context);
 		break;
 	case 'fallback':
-		return wp_ozh_wsa($param);
+		// return the next ad in the fallback chain
+		return wp_ozh_wsa($param, $echo, true);
 		break;
 	case 'any':
 		return true;
@@ -331,11 +336,8 @@ function wp_ozh_wsa_adsenseplugins($code,$echo = true) {
 		$return = $code;
 	}
 	
-	if ($echo) {
-		echo $return;
-	} else {
-		return $return;
-	}
+	if ($echo) echo $return;
+	return $return;
 }
 
 // Wrapper function for 3rd party plugins.
@@ -394,6 +396,7 @@ function wp_ozh_wsa_saveoptions() {
 		'help' => $wp_ozh_wsa['help'],								// boolean for help displaying
 		'adsense_safety' => $wp_ozh_wsa['adsense_safety'], 			// 'on' or 'off' for Admin Adsense Safety feature
 		'date_format' => $wp_ozh_wsa['date_format'],				// 'dmy' or 'mdy'
+		'admin_id' => $wp_ozh_wsa['admin_id'],						// integer: user_id of blog owner
 	);
 	
 	if (get_option($wp_ozh_wsa['optionname']) === false) {
@@ -417,10 +420,11 @@ function wp_ozh_wsa_readoptions() {
 		$wp_ozh_wsa['old'] = 20;
 		$wp_ozh_wsa['regular'] = array(2,10);
 		$wp_ozh_wsa['help'] = true;
-		$wp_ozh_wsa['adsense_safety']  = false;
+		$wp_ozh_wsa['adsense_safety']  = 'off';
+		$wp_ozh_wsa['admin_id'] = -1;
 		$wp_ozh_wsa['date_format'] = 'dmy';
 	} else {
-		// Options found. We still check for empty values, though
+		// Options found. We still check for empty values, though, just to be sure.
 		$wp_ozh_wsa['contexts'] = $options['contexts'];
 		if (!isset($wp_ozh_wsa['contexts']) or empty($wp_ozh_wsa['contexts']))
 			$wp_ozh_wsa['contexts'] = array();
@@ -431,8 +435,17 @@ function wp_ozh_wsa_readoptions() {
 		if (!isset($wp_ozh_wsa['regular']) or empty($wp_ozh_wsa['regular']))
 			$wp_ozh_wsa['regular'] = array(2,10);
 		$wp_ozh_wsa['help'] = $options['help'];
+		if (!isset($wp_ozh_wsa['help']) or empty($wp_ozh_wsa['help']))
+			$wp_ozh_wsa['help'] = true;
 		$wp_ozh_wsa['adsense_safety'] = $options['adsense_safety'];
+		if (!isset($wp_ozh_wsa['adsense_safety']) or empty($wp_ozh_wsa['adsense_safety']))
+			$wp_ozh_wsa['adsense_safety'] = 'off';
+		$wp_ozh_wsa['admin_id'] = $options['admin_id'];
+		if (!isset($wp_ozh_wsa['admin_id']) or empty($wp_ozh_wsa['admin_id']))
+			$wp_ozh_wsa['admin_id'] = -1;
 		$wp_ozh_wsa['date_format'] = $options['date_format'];
+		if (!isset($wp_ozh_wsa['date_format']) or empty($wp_ozh_wsa['date_format']))
+			$wp_ozh_wsa['date_format'] = 'dmy';
 	}
 	
 	// strip slashes where needed
@@ -522,6 +535,9 @@ function wp_ozh_wsa_numview($views, $context) {
 // Suggestion and code by Paula Fugaro (http://ezexpertwebtools.com/) 
 function wp_ozh_wsa_readerview($contextviews, $context) {
 
+	// Don't update view count if we're just previewing the post
+	if (is_preview()) return true;
+	
 	if (isset($_COOKIE['wp_ozh_wsa_'.$context])) {
 		$readerviews = $_COOKIE['wp_ozh_wsa_'.$context];
 	} else {
@@ -607,9 +623,9 @@ function wp_ozh_wsa_setcookie() {
 }
 
 // Is the code a PHP snippet ? Returns boolean
-// UNUSED. Potentially too compromising.
+// UNUSED. Potentially too compromising. Left available for API use.
 function wp_ozh_wsa_is_php($code) {
-	if (preg_match('/^<\?php.*\?>$/s',$code)) return true;
+	if (preg_match('/<\?php.*\?>/s',$code)) return true;
 	return false;
 }
 
@@ -656,7 +672,7 @@ function wp_ozh_wsa_google_ad_type($code) {
 		return 'reftext';
 	} elseif (strpos($format,'_rimg') !== false) {
 		return 'refimage';
-	} elseif (strpos($format,'_al_s') !== false) {
+	} elseif (strpos($format,'ads_al') !== false) {
 		return 'links';
 	} else {
 		return 'ad';
@@ -762,7 +778,7 @@ function wp_ozh_wsa_fakegooglead($dimensions = array(125,125),$type='google',$wh
 	if ($why == 'preview') {
 		$why = 'on preview';
 	} else {
-		$why = 'when viewed by admin';
+		$why = 'when viewed by blog owner';
 	}
 	
 	if ($wp_ozh_wsa['google_css'] !== true) {
@@ -805,12 +821,9 @@ function wp_ozh_wsa_fakegooglead($dimensions = array(125,125),$type='google',$wh
 }
 
 // Determines if viewer is the blog admin. Returns a boolean
-function wp_ozh_wsa_is_admin() {
-	if (preg_match("/wordpressuser[^=]*=admin/i", $_SERVER["HTTP_COOKIE"])) {
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+function wp_ozh_wsa_is_admin($id) {
+	global $user_ID;
+	return ($id == $user_ID);
 }
 
 
@@ -825,7 +838,7 @@ function wp_ozh_wsa_maybe_widgetize() {
 	}
 }
 
-// Create Widgets
+// Create Widgets for each context (Code from Denis)
 function wp_ozh_wsa_widgetize() {
 	global $wp_ozh_wsa;
 	
@@ -840,7 +853,7 @@ function wp_ozh_wsa_widgetize() {
 	}
 }
 
-// Create Widget (sort of) controls
+// Create Widget (sort of) control box
 function wp_ozh_wsa_widget_control() {
 	global $wp_ozh_wsa;
 	echo 'Configure and set up display rules on the <a href="'.$wp_ozh_wsa['admin_url'].'">Who Sees Ads</a> administration page';
