@@ -30,7 +30,8 @@ Author URI: http://planetozh.com/
 		 added: support for rotating ads a la WPAds (my_options.php setting)
 		 added: option for login name for Adsense Safety (suggestion from Steffen)
 		 added: setting in my_options.php : code textarea height
-		 
+   1.3.3 fixed: wrong handling of custom search engine list when defined in my_options.php
+		 fixed: wrong handling of preferences for help displaying
 */
 
 $wp_ozh_wsa['iknowphp'] = true;
@@ -435,8 +436,6 @@ function wp_ozh_wsa_readoptions() {
 		if (!isset($wp_ozh_wsa['regular']) or empty($wp_ozh_wsa['regular']))
 			$wp_ozh_wsa['regular'] = array(2,10);
 		$wp_ozh_wsa['help'] = $options['help'];
-		if (!isset($wp_ozh_wsa['help']) or empty($wp_ozh_wsa['help']))
-			$wp_ozh_wsa['help'] = true;
 		$wp_ozh_wsa['adsense_safety'] = $options['adsense_safety'];
 		if (!isset($wp_ozh_wsa['adsense_safety']) or empty($wp_ozh_wsa['adsense_safety']))
 			$wp_ozh_wsa['adsense_safety'] = 'off';
@@ -498,6 +497,7 @@ function wp_ozh_wsa_olderthan($limit) {
 
 // Checks if a visitor's referrer shows a search engine. Returns boolean
 function wp_ozh_wsa_is_fromsearchengine() {
+	global $wp_ozh_wsa;
 	$ref = $_SERVER['HTTP_REFERER'];
 	if (isset($wp_ozh_wsa['my_search_engines'])) {
 		$SE = $wp_ozh_wsa['my_search_engines'];

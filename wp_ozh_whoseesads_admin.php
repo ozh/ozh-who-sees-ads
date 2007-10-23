@@ -444,12 +444,6 @@ PAYPAL;
 	
 	echo "
 	<div class=\"wrap\">
-	<form id=\"ozh_wsa_form_toggle\" method=\"post\">Display the short explanation &amp; wizards at the top of this page 
-	<input type=\"hidden\" name=\"action\" value=\"help\"/><input type=\"checkbox\" $checked name=\"toggle\" value=\"1\" onclick=\"$('ozh_wsa_form_toggle').submit()\"/>";
-	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
-	echo "
-	<input type=\"hidden\" name=\"whoseesads\" value=\"1\"/>
-	</form>
 	<p>$paypal Does <a href='http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/'>Who Sees Ads</a> make you happy? Do you find it useful? If you think this plugin helps you monetize your blog, please consider donating. I've spent countless hours developing and testing it, any donation of a few bucks or euros is really rewarding and keeps me motivated to release free plugins. <strong>Thank you for your support!</strong></p>
 	<p>If you like this plugin, check my other <a href='http://planetozh.com/blog/my-projects/'>WordPress related stuff</a>!</p>
 	</div>\n";
@@ -709,6 +703,9 @@ function wp_ozh_wsa_print_definitions() {
 		$checked_dmy	 = '';
 	}
 	
+	if ($wp_ozh_wsa['help'] === true or !isset($wp_ozh_wsa['help'])) $checked='checked="checked"';
+
+	
 	// List of users with publishing rights, if applicable. FIXME: should be ok, might not be completely foolproof regarding Roles.
 	// Get list of authors
 	$authors = get_author_user_ids();
@@ -763,12 +760,16 @@ HTML;
 	<p>Your preferred <strong>Date format</strong> is 
 	<input name="date_format" id="date_format_dmy" value="dmy" $checked_dmy type="radio"><label for="date_format_dmy">dd/mm/yyyy</label>
 	<input name="date_format" id="date_format_mdy" value="mdy" $checked_mdy type="radio"><label for="date_format_mdy">mm/dd/yyyy</label>
+	<p>Display the short explanation &amp; wizards at the top of this page <input type="checkbox" $checked name="toggle" value="1" />
 	</p>
 	<p><button type="submit" class="wsa_button" /><img src="$ok" alt="" />Update Options &raquo;</button></p>
 	</form>
 	</div>
 HTML;
 }
+
+
+	
 
 // Print the javascript functions needed by this amazingly sexy UI
 function wp_ozh_wsa_print_javascript() {
@@ -1229,9 +1230,8 @@ function wp_ozh_wsa_processforms() {
 	case 'rename':
 		$msg = wp_ozh_wsa_processforms_duprename();
 		break;
-	case 'help':
-		$msg = wp_ozh_wsa_processforms_help();
-		break;
+	default:
+		$msg = 'Wow, great, you managed to submit stuff that the plugin cannot understand!?';
 	}
 	wp_ozh_wsa_readoptions();
 
@@ -1243,31 +1243,21 @@ function wp_ozh_wsa_processforms() {
 	echo "</div>\n";
 }
 
-// Function processing the "Help" form
-function wp_ozh_wsa_processforms_help() {
-	global $wp_ozh_wsa;
-
-	if ($_POST['toggle']==1) {
-		$wp_ozh_wsa['help'] = true;
-	} else {
-		$wp_ozh_wsa['help'] = false;
-	}
-	
-	wp_ozh_wsa_saveoptions();
-	
-	return 'Help display toggled';
-}
-
 
 // Function processing the "Global Options" form
 function wp_ozh_wsa_processforms_definitions() {
 	global $wp_ozh_wsa;
 	
-	$wp_ozh_wsa['old'] = $_POST['old'];
-	$wp_ozh_wsa['regular'] = array($_POST['regular_num'],$_POST['regular_days']);
+	$wp_ozh_wsa['old'] = intval($_POST['old']);
+	$wp_ozh_wsa['regular'] = array(intval($_POST['regular_num']),intval($_POST['regular_days']));
 	$wp_ozh_wsa['adsense_safety'] = $_POST['adsense_safety'];
 	$wp_ozh_wsa['date_format'] = $_POST['date_format'];
 	$wp_ozh_wsa['admin_id'] = $_POST['admin_id'];
+	if ($_POST['toggle']==1) {
+		$wp_ozh_wsa['help'] = true;
+	} else {
+		$wp_ozh_wsa['help'] = false;
+	}
 
 	wp_ozh_wsa_saveoptions();
 	
