@@ -3,7 +3,7 @@
 Plugin Name: Who Sees Ads ?
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money.
-Version: 1.3.2
+Version: 1.3.3
 Author: Ozh
 Author URI: http://planetozh.com/
 */
