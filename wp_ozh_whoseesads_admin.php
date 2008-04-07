@@ -1,11 +1,13 @@
 <?php
 /*
-This file is part of the Wordpress Plugin "Who Sees Ads"
+This file is part of the Wordpress Plugin "Who Sees Ads" version 2.0
 It contains what's needed for the (uber mega sexy) administration menu
 See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 */
 
 /************** ADMIN FUNCTIONS ******************/
+
+global $wp_ozh_wsa;
 
 // Print the admin page
 function wp_ozh_wsa_addmenupage() {
@@ -134,20 +136,23 @@ function wp_ozh_wsa_print_context() {
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
 	echo '<input type="hidden" name="action" value="add"/>
 	<input type="hidden" name="whoseesads" value="1"/>
-	<table border="0" id="wsa_table" cellspacing="5"><tr>
-	<td valign="top" class="wsa_celltitle">Name of the Context <span class="wsa_helpicon" id="helpicon_name">'; echo $help; echo '</span></td>
+	<table border="0" id="wsa_table" class="form-table" cellspacing="5">
+	<tbody>
+	<tr>
+	<th scope="row" valign="top" class="wsa_celltitle">Name of the Context <span class="wsa_helpicon" id="helpicon_name">'; echo $help; echo '</span></th>
 	<td valign="top">';
 	echo $select;
 	echo '<br/>
 	<div>
-	<span style="color:#aae">Posts:</span> <tt style="color:#99c">&lt;!--wsa:<span class="usage_context">context_name</span>--></tt>&nbsp; <span class="wsa_helpicon" id="helpicon_syntax">'; echo $help; echo '</span><br/>
-	<span style="color:#aae">PHP:</span> <tt style="color:#99c">&lt?php&nbsp;wp_ozh_wsa("<span class="usage_context">context_name</span>");?></tt>
+	<span style="color:#99c">Posts:</span> <tt style="color:#669">&lt;!--wsa:<span class="usage_context">context_name</span>--></tt>&nbsp; <span class="wsa_helpicon" id="helpicon_syntax">'; echo $help; echo '</span><br/>
+	<span style="color:#99c">PHP:</span> <tt style="color:#669">&lt?php&nbsp;wp_ozh_wsa("<span class="usage_context">context_name</span>");?></tt>
 	</div>
 	</td>
-	<td rowspan="4"></td>
+
 	</tr>
+
 	<tr>
-	<td valign="top" class="wsa_celltitle">Possible Rules <span class="wsa_helpicon" id="helpicon_possible">'; echo $help; echo '</span></td>
+	<th scope="row" valign="top" class="wsa_celltitle">Possible Rules <span class="wsa_helpicon" id="helpicon_possible">'; echo $help; echo '</span></th>
 	<td valign="bottom" class="wsa_cell" id="wsa_active_rules">
 	';
 	
@@ -155,15 +160,18 @@ function wp_ozh_wsa_print_context() {
 	wp_ozh_wsa_print_sortable(1,$new);
 		
 	echo '</td>
-	</tr><tr><td valign="top" class="wsa_celltitle">Active Rules <span class="wsa_helpicon" id="helpicon_active">'; echo $help; echo '</span></td><td valign="top" class="wsa_cell">';
-
+	</tr>
+	<tr>
+	<th scope="row" valign="top" class="wsa_celltitle">Active Rules <span class="wsa_helpicon" id="helpicon_active">'; echo $help; echo '</span></th>
+	<td valign="top" class="wsa_cell">';
+	
 	// Sortable 2 : active conditions
 	wp_ozh_wsa_print_sortable(2,$new);
 
 	echo '
 	</tr>
 	<tr>
-	<td valign="top" class="wsa_celltitle">Ad Code <span class="wsa_helpicon" id="helpicon_code">'; echo $help; echo '</span></td>
+	<th scope="row"  valign="top" class="wsa_celltitle">Ad Code <span class="wsa_helpicon" id="helpicon_code">'; echo $help; echo '</span></th>
 	<td valign="top">
 	';
 	
@@ -178,8 +186,9 @@ function wp_ozh_wsa_print_context() {
 	echo '</td>
 	</tr>
 	<tr>
-	<td valign="top" class="wsa_celltitle">Optional Comment <span class="wsa_helpicon" id="helpicon_comment">'; echo $help; echo '</span></td><td valign="top">';
-		
+	<th scope="row"  valign="top" class="wsa_celltitle">Optional Comment <span class="wsa_helpicon" id="helpicon_comment">'; echo $help; echo '</span></th>
+	<td valign="top">';
+	
 	wp_ozh_wsa_print_contextcomment($new);
 	
 	if (isset($wp_ozh_wsa['my_rotatecode_separator'])) {
@@ -196,15 +205,15 @@ function wp_ozh_wsa_print_context() {
 		$rotatecode = '';
 	}
 	
-	echo '</td><td valign="top">
-	
-	<input type="hidden" id="serialize_sortables" name="serialize" />
-
-	<button type="submit" class="wsa_button" /><img src="';echo $ok;echo '" alt="" />Save context &raquo;</button>
-	</p>
-	</td>
-	
+	echo '</td>
 	</tr>
+	<th scope="row">&nbsp;</th>
+	<td valign="top">
+	<input type="hidden" id="serialize_sortables" name="serialize" />
+	<button type="submit" class="wsa_button" /><img src="';echo $ok;echo '" alt="" />Save context &raquo;</button>
+	</td>
+	</tr>
+	</tbody>
 	</table>
 	</form>
 	</div>
@@ -357,8 +366,13 @@ function wp_ozh_wsa_print_duplicate() {
 
 	echo '
 	<form method="post" id="ozh_wsa_form_duprename" onsubmit="return (ozh_wsa_duprename_check());" action="">
+	<table class="form-table">
+	<tbody>
 	<input type="hidden" name="whoseesads" value="1"/>
 	<input type="hidden" id="wsa_duprename" name="action" value="">
+	<tr>
+	<th scope="row">Select Context</th>
+	<td>
 	<select id="duprename_source" name="source" style="padding:3px">
 	';
 
@@ -371,14 +385,18 @@ function wp_ozh_wsa_print_duplicate() {
 	
 	echo '</select>
 	<span style="font-size:24px">&rarr;</span> <input type="text" id="duprename_target" name="target"/>
-	<p><button type="submit" class="wsa_button" onclick="return ozh_wsa_duplicate()" ><img src="';echo $duplicate;echo '" alt="" />Duplicate &raquo;</button>
+	</td>
+	</tr>
+	<th scope="row">&nbsp;</th>
+	<td><button type="submit" class="wsa_button" onclick="return ozh_wsa_duplicate()" ><img src="';echo $duplicate;echo '" alt="" />Duplicate &raquo;</button>
 	 &nbsp; 
 	<button type="submit" class="wsa_button" onclick="return ozh_wsa_rename()" /><img src="';echo $rename;echo '" alt="" />Rename &raquo;</button>
-	</p>';
+	';
 	
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
 	
 	echo '
+	</td></tr></tbody></table>
 	</form>
 	</div>
 	';
@@ -400,8 +418,12 @@ function wp_ozh_wsa_print_delete() {
 
 	echo '
 	<form method="post" id="ozh_wsa_form_delete" action="">
+	<table class="form-table"><tbody>
 	<input type="hidden" name="action" value="delete">
 	<input type="hidden" name="whoseesads" value="1"/>
+	<tr>
+	<th scope="row" valign="top">Select Context(s)</th>
+	<td>
 	<ul class="wsa_del">
 	';
 
@@ -414,11 +436,15 @@ function wp_ozh_wsa_print_delete() {
 	$cancel = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/cancel.gif';
 
 	echo '</ul>
-	<p><button type="submit" class="wsa_button" onclick="return ozh_wsa_checkdelete();" /><img src="';echo $cancel;echo '" alt="" />Delete &raquo;</button></p>
+	</td></tr>
+	<tr>
+	<th scope="row">&nbsp;</th>
+	<td valign="top"><button type="submit" class="wsa_button" onclick="return ozh_wsa_checkdelete();" /><img src="';echo $cancel;echo '" alt="" />Delete &raquo;</button></td>
 	';
-
+	
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
-	echo '</form></div>
+	echo '</tr></tbody></table>
+	</form></div>
 	';
 	
 }
@@ -444,8 +470,17 @@ PAYPAL;
 	
 	echo "
 	<div class=\"wrap\">
-	<p>$paypal Does <a href='http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/'>Who Sees Ads</a> make you happy? Do you find it useful? If you think this plugin helps you monetize your blog, please consider donating. I've spent countless hours developing and testing it, any donation of a few bucks or euros is really rewarding and keeps me motivated to release free plugins. <strong>Thank you for your support!</strong></p>
+	<table class='form-table'>
+	<tr><td>
+	<form id=\"ozh_wsa_form_toggle\" method=\"post\">Display the short explanation &amp; wizards at the top of this page 
+	<input type=\"hidden\" name=\"action\" value=\"help\"/><input type=\"checkbox\" $checked name=\"toggle\" value=\"1\" onclick=\"$('ozh_wsa_form_toggle').submit()\"/>";
+	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
+	echo "
+	<input type=\"hidden\" name=\"whoseesads\" value=\"1\"/>
+	</form>
+	<p>$paypal Does this plugin make you happy? Do you find it useful? If you think this plugin helps you monetize your blog, please consider donating. I've spent countless hours developing and testing it, any donation of a few bucks or euros is really rewarding and keeps me motivated to release free plugins. <strong>Thank you for your support!</strong></p>
 	<p>If you like this plugin, check my other <a href='http://planetozh.com/blog/my-projects/'>WordPress related stuff</a>!</p>
+	</td></tr></table>
 	</div>\n";
 }
 
@@ -749,20 +784,21 @@ function wp_ozh_wsa_print_definitions() {
 HTML;
 	wp_ozh_wsa_nonce_field($wp_ozh_wsa['nonce']);
 	echo <<<HTML
+	<table class="form-table"><tbody>
 	<input type="hidden" name="whoseesads" value="1"/>
     <input type="hidden" name="action" value="definitions">
-    <p>An "<strong>old post</strong>" is a post or page which has been posted more than <input type="text" class="code" value="$old" name="old" size="3"> days ago (you can fine tune this on a per context basis)</p>
-	<p>A "<strong>regular reader</strong>" is someone who has viewed at least <input type="text" class="code" value="$reg_num" name="regular_num" size="3"> pages over the last <input type="text" class="code" value="$reg_days" name="regular_days" size="3"> days</p>
-	<p>The <strong>Admin Clicks Safety</strong><span class="wsa_helpicon" id="helpicon_adsense_safety">$help</span> option is
+    <tr><th scope="row">Old post</th><td>An "<strong>old post</strong>" is a post or page which has been posted more than <input type="text" class="code" value="$old" name="old" size="3"> days ago (you can fine tune this on a per context basis)</p></td></tr>
+	<tr><th scope="row">Regular Reader</th><td>A "<strong>regular reader</strong>" is someone who has viewed at least <input type="text" class="code" value="$reg_num" name="regular_num" size="3"> pages over the last <input type="text" class="code" value="$reg_days" name="regular_days" size="3"> days</p></td></tr>
+	<tr><th scope="row">Click Safety</th><td>The <strong>Admin Clicks Safety</strong><span class="wsa_helpicon" id="helpicon_adsense_safety">$help</span> option is
 	<input name="adsense_safety" id="adsense_safety_on" value="on" $checked_on type="radio"><label for="adsense_safety_on">Enabled</label>
 	<input name="adsense_safety" id="adsense_safety_off" value="off" $checked_off type="radio"><label for="adsense_safety_off">Disabled</label>
-	$admin_id</p>
-	<p>Your preferred <strong>Date format</strong> is 
+	$admin_id </td></tr>
+	<tr><th scope="row">Date format</th><td>Your preferred <strong>Date format</strong> is 
 	<input name="date_format" id="date_format_dmy" value="dmy" $checked_dmy type="radio"><label for="date_format_dmy">dd/mm/yyyy</label>
 	<input name="date_format" id="date_format_mdy" value="mdy" $checked_mdy type="radio"><label for="date_format_mdy">mm/dd/yyyy</label>
-	<p>Display the short explanation &amp; wizards at the top of this page <input type="checkbox" $checked name="toggle" value="1" />
-	</p>
-	<p><button type="submit" class="wsa_button" /><img src="$ok" alt="" />Update Options &raquo;</button></p>
+	</td></tr>
+	<tr><th scope="row">&nbsp;</th><td><button type="submit" class="wsa_button" /><img src="$ok" alt="" />Update Options &raquo;</button></td></tr>
+	</tbody></table>
 	</form>
 	</div>
 HTML;
@@ -780,7 +816,10 @@ function wp_ozh_wsa_print_javascript() {
 	$context_hideall = '';
 	
 	$contexts = array_keys($wp_ozh_wsa['contexts']);
+	$context_list = "['" . join ("', '", $contexts) . "']";
+
 	array_unshift($contexts,$new);
+	
 
 	if ($wp_ozh_wsa['iknowphp']) $helpcustom = <<<HELPC
 	document.getElementsByClassName('helpicon_custom').each(function(item){
@@ -817,7 +856,18 @@ SORTABLE;
 	echo <<<JS
 	<script type="text/javascript">
 	// <![CDATA[
+	/*
+	 _____  _____   ____ _______ ____ _________     _______  ______    _____ _    _  _____ _  __ _____ 
+	|  __ \|  __ \ / __ \__   __/ __ \__   __\ \   / /  __ \|  ____|  / ____| |  | |/ ____| |/ // ____|
+	| |__) | |__) | |  | | | | | |  | | | |   \ \_/ /| |__) | |__    | (___ | |  | | |    | ' /| (___  
+	|  ___/|  _  /| |  | | | | | |  | | | |    \   / |  ___/|  __|    \___ \| |  | | |    |  <  \___ \ 
+	| |    | | \ \| |__| | | | | |__| | | |     | |  | |    | |____   ____) | |__| | |____| . \ ____) |
+	|_|    |_|  \_\_____/  |_|  \____/  |_|     |_|  |_|    |______| |_____/ \____/ \_____|_|\_\_____/ 
+    God I wished I didn't use prototype when starting this beast....
+	*/
 
+	var wsa_context_list = $context_list;
+	
 	// Make all list draggable & sortable
 	$sortables
 	
@@ -855,6 +905,13 @@ SORTABLE;
 		// "New context" selected, but no name given
 		if ($('context_sel').value == '$new' && $('$new').value == '') {
 			alert("Please input a name for this context");
+			return false;
+		}
+		
+		// Name already taken ?
+		if (ozh_wsa_alreadyexists( $('$new').value )) {
+			alert('This context already exists. Please pick another name');
+			$('context_sel').focus();
 			return false;
 		}
 		
@@ -941,7 +998,18 @@ SORTABLE;
 			return false;
 		}
 		
+		// Name already taken ?
+		if (ozh_wsa_alreadyexists( $('duprename_target').value )) {
+			alert('This context already exists. Please pick another name');
+			return false;
+		}
+		
 		return true;
+	}
+	
+	// Return true or false if a context name already exists
+	function ozh_wsa_alreadyexists( context) {
+		return ( wsa_context_list.indexOf(context) == -1 ) ? false : true ;
 	}
 	
 	// Do checks before submitting a duplication
@@ -974,9 +1042,8 @@ SORTABLE;
 			if (answer) return true;
 		} else {
 			alert('Please select a context');
+			return false;
 		}
-		
-		return false;
 	}
 
 	// Reset a few things on load
@@ -1010,8 +1077,8 @@ SORTABLE;
 				ozh_wsa_toggleselect('hide',target);
 			}
 			Effect.Appear($(target),{duration:0.2});
-			$(target).style.top = (Event.pointerY(e)+20)+'px';
-			//$(target).style.left = (Event.pointerX(e)+20)+'px';
+			$(target).style.top = (Event.pointerY(e)-16)+'px';
+			$(target).style.left = (Event.pointerX(e)+15)+'px';
 		};
 		$(item).onmouseout=function(e){
 			if (!e) ozh_wsa_toggleselect('show');
@@ -1068,15 +1135,20 @@ if (isset($wp_ozh_wsa['my_codetextarea'])) {
 
 	echo <<<CSS
 <style type="text/css">
+.wrap {
+	margin-bottom:40px;
+}
 .wsa_del {
 	list-style-type:none;
 	clear:both;
 	overflow:auto;
 	_height:1%;
+	padding:0 3px;
+	margin:0;
 }
 .wsa_listdel {
 	float:left;
-	width:20%;
+	width:30%;
 }
 .wsa_listdel:hover {
 	color:#d00;
@@ -1116,9 +1188,9 @@ if (isset($wp_ozh_wsa['my_codetextarea'])) {
 	z-index:9999;
 	font-size:11px;
 	width:306px;
-	padding:2px 10px 10px 20px;
-	border:2px solid #ff3;
-	background:#ffc;
+	padding:2px 10px 10px 25px;
+	background: transparent url($images/helpbox.png) 0 0 no-repeat !important;
+	#background:#ffc;
 }
 .wsa_helpbox h3 {
 	font-size:120%;
@@ -1154,14 +1226,12 @@ if (isset($wp_ozh_wsa['my_codetextarea'])) {
 	_width:200px;
 	height:30px;
 }
-.wsa_cell {
-	border:2px solid #ddf;
-	_border:2px solid #aae;
-	min-height:10px;
-	padding:1px;
-}
-.wsa_cell:hover {
-	border:2px solid #aae;
+.wsa_cell ul{
+	background:white;
+	padding:5px;
+	border:1px solid #555;
+	min-height:30px;
+	width:75%;
 }
 .wsa_sortable {
 	margin:0;
@@ -1177,12 +1247,12 @@ if (isset($wp_ozh_wsa['my_codetextarea'])) {
 	list-style-type:none;
 }
 .wsa_sortable_li tt {
-	color:#99c;
+	color:#55a;
 }
 .wsa_sortable_li {
-	border:1px solid #eed;
+	border:1px solid #aac;
 	padding:2px 10px;
-	background:#eef;
+	background:#cfebf7;
 	white-space:nowrap;
 }
 span.wsa_handle {
@@ -1230,17 +1300,33 @@ function wp_ozh_wsa_processforms() {
 	case 'rename':
 		$msg = wp_ozh_wsa_processforms_duprename();
 		break;
-	default:
-		$msg = 'Wow, great, you managed to submit stuff that the plugin cannot understand!?';
+	case 'help':
+		$msg = wp_ozh_wsa_processforms_help();
+		break;
 	}
 	wp_ozh_wsa_readoptions();
 
 	// ze debug print_r !
 	// echo "<pre>";echo '$_POST: ';print_r(array_map('attribute_escape',$_POST));echo "</pre>";
 	
-	echo "<p>$msg</p>\n";
+	echo "<p><strong>Who Sees Ads &raquo;</strong> $msg</p>\n";
 	
 	echo "</div>\n";
+}
+
+// Function processing the "Help" form
+function wp_ozh_wsa_processforms_help() {
+        global $wp_ozh_wsa;
+
+        if ($_POST['toggle']==1) {
+                $wp_ozh_wsa['help'] = true;
+        } else {
+                $wp_ozh_wsa['help'] = false;
+        }
+
+        wp_ozh_wsa_saveoptions();
+
+        return 'Help display toggled';
 }
 
 
@@ -1267,7 +1353,7 @@ function wp_ozh_wsa_processforms_definitions() {
 // Function processing the main form (Add / Update a context)
 function wp_ozh_wsa_processforms_add() {
 	global $wp_ozh_wsa;
-
+	
 	// field 'serialize' contains the list of items which were in the second sortable list, ie the "active conditions"
 	// let's parse its content
 	// [serialize] => coucou_2[]=olderthan&coucou_2[]=any
@@ -1277,6 +1363,9 @@ function wp_ozh_wsa_processforms_add() {
 
 	if ($_POST['context']) {
 		$contextname = wp_ozh_wsa_processforms_sanitize($_POST['context']);
+		if (array_key_exists($contextname,$wp_ozh_wsa['contexts'])) {
+			return "<b>Error</b>: There is already another context named <b>$contextname</b>";
+		}
 		$action = 'created';
 	} else {
 		$contextname = wp_ozh_wsa_processforms_sanitize($_POST['context_sel']);
@@ -1540,74 +1629,6 @@ if ( !function_exists('wp_nonce_field') ) {
 } else {
 	function wp_ozh_wsa_nonce_field($action = -1) { return wp_nonce_field($action); }
 	$wp_ozh_wsa['nonce'] = 'ozh-wsa';
-}
-
-// Compatibility check with WP before 2.3
-if (!function_exists('wp_dropdown_users')) {
-	function wp_dropdown_users( $args = '' ) {
-		global $wpdb;
-		$defaults = array(
-			'show_option_all' => '', 'show_option_none' => '',
-			'orderby' => 'display_name', 'order' => 'ASC',
-			'include' => '', 'exclude' => '',
-			'show' => 'display_name', 'echo' => 1,
-			'selected' => 0, 'name' => 'user', 'class' => ''
-		);
-
-		$defaults['selected'] = is_author() ? get_query_var( 'author' ) : 0;
-
-		$r = wp_parse_args( $args, $defaults );
-		extract( $r, EXTR_SKIP );
-
-		$query = "SELECT * FROM $wpdb->users";
-
-		$query_where = array();
-
-		if ( is_array($include) )
-			$include = join(',', $include);
-		$include = preg_replace('/[^0-9,]/', '', $include); // (int)
-		if ( $include )
-			$query_where[] = "ID IN ($include)";
-
-		if ( is_array($exclude) )
-			$exclude = join(',', $exclude);
-		$exclude = preg_replace('/[^0-9,]/', '', $exclude); // (int)
-		if ( $exclude )
-			$query_where[] = "ID NOT IN ($exclude)";
-
-		if ( $query_where )
-			$query .= " WHERE " . join(' AND', $query_where);
-
-		$query .= " ORDER BY $orderby $order";
-
-		$users = $wpdb->get_results( $query );
-
-		$output = '';
-		if ( !empty($users) ) {
-			$output = "<select name='$name' id='$name' class='$class'>\n";
-
-			if ( $show_option_all )
-				$output .= "\t<option value='0'>$show_option_all</option>\n";
-
-			if ( $show_option_none )
-				$output .= "\t<option value='-1'>$show_option_none</option>\n";
-
-			foreach ( $users as $user ) {
-				$user->ID = (int) $user->ID;
-				$_selected = $user->ID == $selected ? " selected='selected'" : '';
-				$output .= "\t<option value='$user->ID'$_selected>" . wp_specialchars($user->$show) . "</option>\n";
-			}
-
-			$output .= "</select>";
-		}
-
-		$output = apply_filters('wp_dropdown_users', $output);
-
-		if ( $echo )
-			echo $output;
-
-		return $output;
-	}
 }
 
 add_action('explain_nonce_ozh-wsa','wp_ozh_wsa_nonce_explain');

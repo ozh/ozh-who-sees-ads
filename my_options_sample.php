@@ -1,6 +1,6 @@
 <?php
 /*
-This file is part of the Wordpress Plugin "Who Sees Ads"
+This file is part of the Wordpress Plugin "Who Sees Ads" version 2.0
 It contains personal and custom settings for *ADVANCED* users.
 See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 */
@@ -20,7 +20,7 @@ See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-
 // $wp_ozh_wsa['my_codetextarea'] = '220px';
 
 /* Support for multiple code in a single context, to be randomly picked (rotated) */
-// $wp_ozh_wsa['my_rotatecode_separator'] = '**** CODE ****';
+// $wp_ozh_wsa['my_rotatecode_separator'] = '**** ROTATE ****'
 
 /* List of custom search engines. Overrides, does not add to original list */
 // $wp_ozh_wsa['my_search_engines'] = array('/search?', 'images.google.', 'web.info.com', 'search.', 'del.icio.us/search', 'soso.com', '/search/', '.yahoo.', );
@@ -46,7 +46,7 @@ See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-
 // You can either define inline here, or file_get_contents('./mycss.css'), etc..
 // $wp_ozh_wsa['my_fakead-css'] = '<style>div.myfakead {border:3px solid red}</style>';
 
-/* Override Adsense or YPN maximums ? */
+/* Override Adsense or YPN maximums */
 // define('OZH_WSA_MAX_GOOGLE_AD',3);
 // define('OZH_WSA_MAX_GOOGLE_SEARCH',2);
 // define('OZH_WSA_MAX_GOOGLE_LINKS',3);

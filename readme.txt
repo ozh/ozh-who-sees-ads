@@ -1,8 +1,7 @@
 === Plugin Name ===
 Donate link: http://planetozh.com/exit/donate
 Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh, monetize, monetization, paypal
-Requires at least: 2.0.11
-Tested up to: 2.4-bleeding
+Requires at least: 2.5
 Stable tag: trunk
 
 Manage your ads. Define under what condition they will show (visitor from search engine, old post..). Make more money.

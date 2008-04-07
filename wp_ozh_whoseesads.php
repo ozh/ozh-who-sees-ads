@@ -2,8 +2,8 @@
 /*
 Plugin Name: Who Sees Ads ?
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
-Description: Manage your Ads. Decide under when circumstances to display them. Make more money.
-Version: 1.3.3
+Description: Manage your Ads. Decide under when circumstances to display them. Make more money. <strong>For WordPress 2.5</strong>
+Version: 2.0
 Author: Ozh
 Author URI: http://planetozh.com/
 */
@@ -32,7 +32,11 @@ Author URI: http://planetozh.com/
 		 added: setting in my_options.php : code textarea height
    1.3.3 fixed: wrong handling of custom search engine list when defined in my_options.php
 		 fixed: wrong handling of preferences for help displaying
+   2.0   changed: Revamped GUI, to be compatible with WordPress 2.5+ (and not earlier)
+         improved: Widget support (thanks to Eduardo Costa)
 */
+
+global $wp_ozh_wsa;
 
 $wp_ozh_wsa['iknowphp'] = true;
 	// if set to true, enables advanced conditional tests.
@@ -370,7 +374,7 @@ function wp_ozh_wsa_addmenu() {
 	global $wp_ozh_wsa, $plugin_page, $pagenow;
 	if (is_plugin_page() && strpos($plugin_page, 'whoseesads') !== false) {
 		// add Scriptaculous & co only on the plugin page
-		wp_enqueue_script('scriptaculous');
+		wp_enqueue_script('scriptaculous-dragdrop');
 	}
 	require_once(ABSPATH.'wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/wp_ozh_whoseesads_admin.php');
 
@@ -846,7 +850,7 @@ function wp_ozh_wsa_widgetize() {
 		register_sidebar_widget('Ad: ' . $context,
 			create_function(
 				'$args',
-				'wp_ozh_wsa(\'' . $context . '\', $args);'
+				'wp_ozh_wsa_widget(\'' . $context . '\', $args);'
 				)
 			);
 		register_widget_control('Ad: ' . $context, 'wp_ozh_wsa_widget_control', 200, 100);
@@ -858,6 +862,16 @@ function wp_ozh_wsa_widget_control() {
 	global $wp_ozh_wsa;
 	echo 'Configure and set up display rules on the <a href="'.$wp_ozh_wsa['admin_url'].'">Who Sees Ads</a> administration page';
 }
+
+// Draws a "standard" widget
+function wp_ozh_wsa_widget($context, $args) {
+	extract($args);
+	echo $before_widget;
+	wp_ozh_wsa($context);
+	echo $after_widget;
+}
+
+
 
 
 /********************************************************/
