@@ -1,4 +1,4 @@
-=== Who Sees Ads ===
+=== Ozh' Who Sees Ads ===
 Donate link: http://planetozh.com/exit/donate
 Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh, monetize, monetization, paypal
 Requires at least: 2.5
