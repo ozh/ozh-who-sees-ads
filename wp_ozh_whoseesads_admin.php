@@ -109,7 +109,7 @@ JS;
 function wp_ozh_wsa_print_context() {
 	global $wp_ozh_wsa;
 	
-	$help = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
+	$help = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
 	$help = "<img src='$help' />";
 	
 	$wp_ozh_wsa['newcontext'] = $new = 'new'.time(); // pseudo-random unique name
@@ -181,7 +181,7 @@ function wp_ozh_wsa_print_context() {
 		echo "<span style='color:#aae'>Rotating code separator:</span> <tt style='color:#99c'>${wp_ozh_wsa['my_rotatecode_separator']}</tt>";
 	}	
 
-	$ok = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/ok.gif';
+	$ok = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/ok.gif';
 	
 	echo '</td>
 	</tr>
@@ -277,7 +277,7 @@ function wp_ozh_wsa_print_help() {
 	
 	if (!$wp_ozh_wsa['help'] ) return;
 	
-	$wand = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/wand.gif';
+	$wand = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/wand.gif';
 
 	echo '
 	<div class="wrap"><h2>Who Sees Ads ?</h2>
@@ -380,8 +380,8 @@ function wp_ozh_wsa_print_duplicate() {
 		echo "<option value='$context'>$context</option>";
 	}
 	
-	$duplicate = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/duplicate.gif';
-	$rename = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/rename.gif';
+	$duplicate = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/duplicate.gif';
+	$rename = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/rename.gif';
 	
 	echo '</select>
 	<span style="font-size:24px">&rarr;</span> <input type="text" id="duprename_target" name="target"/>
@@ -433,7 +433,7 @@ function wp_ozh_wsa_print_delete() {
 		echo "<input name='del_context[]' type='checkbox' id='del_context_$context' value='$context' /><span title='Delete this context'> $context </span></label></li>\n";
 	}
 
-	$cancel = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/cancel.gif';
+	$cancel = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/cancel.gif';
 
 	echo '</ul>
 	</td></tr>
@@ -455,9 +455,9 @@ function wp_ozh_wsa_print_misc() {
 	
 	if ($wp_ozh_wsa['help'] === true or !isset($wp_ozh_wsa['help'])) $checked='checked="checked"';
 	
-	$dollar = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/paypal-dollar.gif';
-	$euro = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/paypal-euro.gif';
-	$pound = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/paypal-pound.gif';
+	$dollar = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/paypal-dollar.gif';
+	$euro = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/paypal-euro.gif';
+	$pound = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/paypal-pound.gif';
 	
 	$paypal = <<<PAYPAL
 <div class="wsa_paypal">
@@ -530,7 +530,7 @@ function wp_ozh_wsa_print_sortable_item($item,$context,$list) {
 
 	global $wp_ozh_wsa;
 	
-	$help = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
+	$help = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
 	$help = "<img src='$help' />";
 
 	switch($item) {
@@ -773,9 +773,9 @@ function wp_ozh_wsa_print_definitions() {
 		$admin_id = "<span id='admin_id_span' style='display:$admin_id_display'>for user $admin_id (blog / Adsense account owner)</span>";
 	}
 	
-	$help = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
+	$help = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/help.gif';
 	$help = "<img src='$help' />";
-	$ok = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/ok.gif';
+	$ok = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images/ok.gif';
 	
 	echo <<<HTML
     <div class="wrap">
@@ -822,12 +822,12 @@ function wp_ozh_wsa_print_javascript() {
 	
 
 	if ($wp_ozh_wsa['iknowphp']) $helpcustom = <<<HELPC
-	document.getElementsByClassName('helpicon_custom').each(function(item){
+	$$('.helpicon_custom').each(function(item){
 		ozh_wsa_togglehelp(item,'helpbox_custom');
 	});
 	
 	// Make textareas for custom rules bigger when clicked
-	document.getElementsByClassName('wsa_smalltextarea').each(function(item){
+	$$('.wsa_smalltextarea').each(function(item){
 		$(item).onfocus=function(){ $(item).style.height = '48px'};
 		$(item).onblur=function(){ $(item).style.height = '15px'};
 	});
@@ -945,7 +945,7 @@ SORTABLE;
 	// Update "Usage" example
 	function ozh_wsa_updateusage(value) {
 		if (value == undefined || value == '') {value = 'context_name';}
-		document.getElementsByClassName('usage_context').each(function(item){
+		$$('.usage_context').each(function(item){
 			$(item).innerHTML = value;
 		});
 	}
@@ -1090,7 +1090,7 @@ SORTABLE;
 	var wsa_visibledrops = new Array();
 	function ozh_wsa_toggleselect(action,helpdiv) {
 		if (action == 'hide') {
-			document.getElementsByClassName('wsa_display_drop').each(function(item){
+			$$('.wsa_display_drop').each(function(item){
 				// if element is visible (ie inside a visible <ul>) hide it and add it to our list
 				if ($(item).parentNode.parentNode.style.display != 'none' ) {
 					wsa_visibledrops[wsa_visibledrops.length] = item;
@@ -1125,7 +1125,7 @@ JS;
 function wp_ozh_wsa_print_css() {
 global $wp_ozh_wsa;
 
-$images = get_bloginfo('url').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images';
+$images = get_bloginfo('wpurl').'/wp-content/plugins/'.dirname($wp_ozh_wsa['path']).'/images';
 
 if (isset($wp_ozh_wsa['my_codetextarea'])) {
 	$textarea_height = $wp_ozh_wsa['my_codetextarea'];
