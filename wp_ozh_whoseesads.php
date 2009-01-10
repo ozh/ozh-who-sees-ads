@@ -3,7 +3,7 @@
 Plugin Name: Ozh' Who Sees Ads
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money. <strong>For WordPress 2.5</strong>
-Version: 2.0.1
+Version: 2.0.2
 Author: Ozh
 Author URI: http://planetozh.com/
 */
@@ -35,7 +35,8 @@ Author URI: http://planetozh.com/
    2.0   changed: Revamped GUI, to be compatible with WordPress 2.5+ (and not earlier)
          improved: Widget support (thanks to Eduardo Costa)
    2.0.1 fixed: prototype fix for Firefox3 (replace document.getElementsByClassName with $$) (thanks to Scott McGerik)
-         fixed: images with WordPress not installed in blog root 
+         fixed: images with WordPress not installed in blog root
+   2.0.2 added: "add_action('widget_text', 'wp_ozh_wsa_filter')" to be compatible with the Wordpress standard Text widget (thanks to Jacob Brunson)
 */
 
 global $wp_ozh_wsa;
@@ -841,6 +842,7 @@ function wp_ozh_wsa_maybe_widgetize() {
 	if (!isset($wp_ozh_wsa['my_menu']) or $wp_ozh_wsa['my_menu'] !== false) {
 		$wp_ozh_wsa['do_widgets'] = true;
 		add_action('widgets_init', 'wp_ozh_wsa_widgetize');
+		add_action('widget_text', 'wp_ozh_wsa_filter');
 	}
 }
 
