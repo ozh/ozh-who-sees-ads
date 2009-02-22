@@ -2,13 +2,14 @@
 Donate link: http://planetozh.com/exit/donate
 Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh, monetize, monetization, paypal
 Requires at least: 2.5
+Tested up to: 9.9
 Stable tag: trunk
 
 Manage your ads. Define under what condition they will show (visitor from search engine, old post..). Make more money.
 
 == Description ==
 
-**Who Sees Ads** is an advanced **ad management** plugin that lets you decide who will see your ads, depending on user defined conditions. You can manage ads in your templates (eg *sidebar.php*) or within posts and pages.
+**Who Sees Ads** is an advanced **ad management** plugin that lets you decide who will see your ads, for instance Adsense, depending on user defined conditions. You can manage ads in your templates (eg *sidebar.php*) or within posts and pages.
 
 For instance, you could consider the following criteria: Is the visitor a regular reader? Does this visitor come from a search engine? Is the visitor currently reading an old post, or something fresh?
 
