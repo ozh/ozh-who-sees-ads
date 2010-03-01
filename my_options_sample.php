@@ -23,7 +23,7 @@ See http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-
 // $wp_ozh_wsa['my_rotatecode_separator'] = '**** ROTATE ****'
 
 /* List of custom search engines. Overrides, does not add to original list */
-// $wp_ozh_wsa['my_search_engines'] = array('/search?', 'images.google.', 'web.info.com', 'search.', 'del.icio.us/search', 'soso.com', '/search/', '.yahoo.', );
+// $wp_ozh_wsa['my_search_engines'] = array('/search?', '.google.', 'web.info.com', 'search.', 'del.icio.us/search', 'soso.com', '/search/', '.yahoo.', );
 
 /* List of standard context conditions. Feel free to remove the one you'll never use. */
 // $wp_ozh_wsa['my_conditions'] = array ('fromSE', 'regular', 'olderthan', 'logged', 'date', 'numviews', 'readerviews', 'fallback', 'any',);

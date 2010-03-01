@@ -3,7 +3,7 @@
 Plugin Name: Ozh' Who Sees Ads
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money. <strong>For WordPress 2.5</strong>
-Version: 2.0.2
+Version: 2.0.3
 Author: Ozh
 Author URI: http://planetozh.com/
 */
@@ -37,6 +37,7 @@ Author URI: http://planetozh.com/
    2.0.1 fixed: prototype fix for Firefox3 (replace document.getElementsByClassName with $$) (thanks to Scott McGerik)
          fixed: images with WordPress not installed in blog root
    2.0.2 added: "add_action('widget_text', 'wp_ozh_wsa_filter')" to be compatible with the Wordpress standard Text widget (thanks to Jacob Brunson)
+   2.0.3 fixed: pattern to detect Google in referrers
 */
 
 global $wp_ozh_wsa;
@@ -509,7 +510,7 @@ function wp_ozh_wsa_is_fromsearchengine() {
 	if (isset($wp_ozh_wsa['my_search_engines'])) {
 		$SE = $wp_ozh_wsa['my_search_engines'];
 	} else {
-		$SE = array('/search?', 'images.google.', 'web.info.com', 'search.', 'del.icio.us/search',
+		$SE = array('/search?', '.google.', 'web.info.com', 'search.', 'del.icio.us/search',
 		'soso.com', '/search/', '.yahoo.', 
 		);
 	}
