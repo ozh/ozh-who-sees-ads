@@ -4,6 +4,7 @@ Tags: adsense, ypn, yahoo publisher, affiliate, ads, manage ads, ozh, monetize, 
 Requires at least: 2.5
 Tested up to: 9.9
 Stable tag: trunk
+Contributors: ozh
 
 Manage your ads. Define under what condition they will show (visitor from search engine, old post..). Make more money.
 
