@@ -18,6 +18,10 @@ The plugin allows for easily creating display rules with a very advanced user in
 
 For a more detailed documentation, demo of the interface, and examples of advanced usages of the plugin, please visit its official page: [Who Sees Ads](http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/ "Who Sees Ads")
 
+Plugin doc: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
+Plugin dev: https://github.com/ozh/ozh-who-sees-ads
+Features and pull requests: https://github.com/ozh/ozh-who-sees-ads
+
 **Tip:** To keep track of this plugin's evolution and features, you are advised to subscribe to the [author's feed](http://planetozh.com/exit/feed)
 
 == Installation ==
