@@ -649,6 +649,8 @@ function wp_ozh_wsa_is_google_ad($code) {
 	$code = strtolower($code);
 	// regular javascript ad code
 	if (strpos($code,'google_ad_client')!==false) return true;
+	// new async ad code
+	if (strpos($code,'adsbygoogle')!==false) return true;
 	// regular javascript google search code
 	if (strpos($code,'<!-- SiteSearch Google -->')!==false) return true;
 	
