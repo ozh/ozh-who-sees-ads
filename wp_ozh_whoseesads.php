@@ -3,7 +3,7 @@
 Plugin Name: Ozh' Who Sees Ads
 Plugin URI: http://planetozh.com/blog/my-projects/wordpress-plugin-who-sees-ads-control-adsense-display/
 Description: Manage your Ads. Decide under when circumstances to display them. Make more money.
-Version: 2.0.4
+Version: 2.0.5
 Author: Ozh
 Author URI: http://planetozh.com/
 */
@@ -39,6 +39,7 @@ Author URI: http://planetozh.com/
    2.0.2 added: "add_action('widget_text', 'wp_ozh_wsa_filter')" to be compatible with the Wordpress standard Text widget (thanks to Jacob Brunson)
    2.0.3 fixed: pattern to detect Google in referrers
    2.0.4 fixed: correctly detect "updated" Google asyn code (thanks Tobi @jaegerschnitzel)
+   2.0.5 fixed: correctly detect "updated" Google asyn code width & height (thanks Tobi @jaegerschnitzel)
 */
 
 global $wp_ozh_wsa;
