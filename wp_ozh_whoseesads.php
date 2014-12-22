@@ -699,6 +699,9 @@ function wp_ozh_wsa_is_ypn_ad($code) {
 // Returns array(width,length) of the dimensions of an Adsense ad
 function wp_ozh_wsa_googlead_dimensions($code) {
 	preg_match_all('/google_ad_(width|height) *= *([\d]+) *;/',strtolower($code),$matches);
+	if(empty($matches[0]) && empty($matches[1])) {
+		preg_match_all('/;(width|height) *:*([\d]+) *px/',strtolower($code),$matches);
+	}
 	${$matches[1][0]} = $matches[2][0];
 	${$matches[1][1]} = $matches[2][1];
 	// weeeeeeee ! How cool was it ? :)
